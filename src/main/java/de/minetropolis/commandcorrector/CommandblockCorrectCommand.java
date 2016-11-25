@@ -151,7 +151,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		if (commandBlock.update(true, false)) {
 			return Collections.unmodifiableSet(changes);
 		} else {
-			plugin.getLogger().log(Level.WARNING, "Couldn't write commandblock at {0}", commandBlock.getLocation());
+			plugin.getLogger().log(Level.WARNING, "Couldn't change commandblock at {0}", commandBlock.getLocation());
 			return Collections.emptySet();
 		}
 	}
