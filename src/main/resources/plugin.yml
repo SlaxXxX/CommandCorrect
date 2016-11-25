@@ -1,0 +1,19 @@
+name: "${artifactId}"
+version: ${version}
+main: ${basePackage}.${mainClass}
+
+description: "${project.description}"
+author: 'SlaxX_X'
+website: "${project.url}"
+
+commands:
+  commandblockcorrect:
+    description: 'Corrects command-blocks.'
+    usage: /<command> [<radius>] [<pattern> <target>]
+    permission: commandcorrect.apply
+    aliases: [commandcorrect, cc, cbc]
+  commandblockcorrectorconfigreload:
+    description: 'Reloads command-block command-correction config.'
+    usage: /<command>
+    permission: commandcorrect.reload
+    aliases: [commandcorrectreload, ccr, cbccr]
