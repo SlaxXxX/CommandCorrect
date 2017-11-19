@@ -1,5 +1,9 @@
 package de.minetropolis.commandcorrector;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
@@ -8,6 +12,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.*;
@@ -27,7 +32,7 @@ public class CommandblockFindCommand implements CommandExecutor {
             return true;
         }
 
-        args = CommandCorrector.process(args,sender);
+        args = CommandCorrector.process(args, sender);
 
         if (args.length != 2) {
             return false;
@@ -43,8 +48,20 @@ public class CommandblockFindCommand implements CommandExecutor {
 
         Set<Location> locations = findCommandblocks(location, radius, pattern);
 
-        if(locations.size()>0) {
-            locations.forEach(loc -> sender.sendMessage("Found command at: " + locationToString(loc)));
+        if (locations.size() > 0) {
+            if (sender instanceof Player) {
+                Player exactSender = (Player) sender;
+                for (Location loc : locations) {
+                    TextComponent message = new TextComponent("Found command at:" + locationToString(loc));
+                    message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Teleport there!").create()));
+                    message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @p" + locationToString(loc)));
+
+                    exactSender.spigot().sendMessage(message);
+                }
+            } else if (sender instanceof BlockCommandSender) {
+                StringBuilder message = new StringBuilder("Found command at:");
+                locations.forEach(loc -> message.append(locationToString(loc)).append(" ;"));
+            }
         } else {
             sender.sendMessage("No command found.");
         }
@@ -66,7 +83,6 @@ public class CommandblockFindCommand implements CommandExecutor {
                     if (commandBlock instanceof CommandBlock)
                         if (checkCommand((CommandBlock) commandBlock, pattern))
                             locations.add(commandBlock.getLocation());
-
                 }
             }
         }
@@ -79,9 +95,9 @@ public class CommandblockFindCommand implements CommandExecutor {
     }
 
     private String locationToString(Location location) {
-        return new StringBuilder("").append(location.getBlockX())
-                .append(",").append(location.getBlockY())
-                .append(",").append(location.getBlockZ())
+        return new StringBuilder(" ").append(location.getBlockX())
+                .append(" ").append(location.getBlockY())
+                .append(" ").append(location.getBlockZ())
                 .toString();
     }
 }

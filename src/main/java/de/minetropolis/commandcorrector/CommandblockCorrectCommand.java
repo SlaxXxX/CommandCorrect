@@ -2,19 +2,15 @@ package de.minetropolis.commandcorrector;
 
 import java.util.*;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.plugin.Plugin;
 
 public class CommandblockCorrectCommand implements CommandExecutor {
