@@ -16,9 +16,9 @@ commands:
     description: 'Reloads command-block command-correction config.'
     usage: /<command>
     permission: commandcorrect.reload
-    aliases: [commandcorrectreload, ccr, cbccr]
-  commandblockfind:
+    aliases: [commandcorrectreload, ccr, cbcr]
+  commandblockcorrectfind:
     description: 'Finds command-blocks.'
     usage: /<command> <radius> <pattern>
     permission: commandcorrect.find
-    aliases: [commandfind, cf, cbf]
+    aliases: [commandcorrectfind, ccf, cbcf]

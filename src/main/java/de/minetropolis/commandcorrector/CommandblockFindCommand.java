@@ -32,7 +32,11 @@ public class CommandblockFindCommand implements CommandExecutor {
             return true;
         }
 
-        args = CommandCorrector.process(args, sender);
+        args = CommandCorrector.process(args);
+		if (args == null) {
+			sender.sendMessage("wrong ;/ count. use either 0 or 1");
+			return false;
+		}
 
         if (args.length != 2) {
             return false;
