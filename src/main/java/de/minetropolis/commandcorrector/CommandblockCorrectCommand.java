@@ -191,9 +191,8 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	// TEST public
 	public String changeCommand(String command, String pattern, String target) {
 		// TEST
-		// System.out.println(command + " ;; " + pattern + " ;; " + target +
-		// "\n\n");
-		System.out.println(command);
+		 System.out.println(command + " ;; " + pattern + " ;; " + target);
+		//System.out.println(command);
 
 		Matcher matcher = Pattern.compile(pattern).matcher(command);
 

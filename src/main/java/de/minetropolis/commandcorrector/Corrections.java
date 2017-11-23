@@ -9,9 +9,12 @@ import org.bukkit.Location;
 public class Corrections {
 
 	private ArrayList<Correction> corrections = new ArrayList<>();
+	private final int MAX_UNDO = 5;
 
 	public Correction makeNew() {
 		corrections.add(new Correction());
+		if(corrections.size() > MAX_UNDO)
+			corrections.remove(0);
 		return getLast();
 	}
 	
@@ -38,8 +41,8 @@ public class Corrections {
 		}
 	}
 	public class CommandData {
-		private String command,data;
-		private Location location;
+		private final String command,data;
+		private final Location location;
 		
 		private CommandData(Location loc, String command, String data) {
 			location = loc;
