@@ -1,7 +1,3 @@
-import java.util.Map;
-
-import org.bukkit.block.CommandBlock;
-
 import de.minetropolis.commandcorrector.CommandCorrector;
 import de.minetropolis.commandcorrector.CommandblockCorrectCommand;
 
