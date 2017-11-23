@@ -15,13 +15,12 @@ public class CommandTester {
 			}
 			};
 
-	//
 	public static void main(String[] args) {
 		new CommandTester();
 	}
 
 	private CommandTester() {
-		CommandblockCorrectCommand cbc = new CommandblockCorrectCommand();
+		CommandblockCorrectCommand cbc = new CommandblockCorrectCommand(null,null);
 
 		for (int i = 0; i < commands.length; i++) {
 			for (String[] rule : rules) {
@@ -31,5 +30,4 @@ public class CommandTester {
 			System.out.println("\n--------------\n");
 		}
 	}
-	//
 }

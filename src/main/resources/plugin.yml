@@ -24,6 +24,6 @@ commands:
     aliases: [commandcorrectfind, ccf, cbcf]
   commandblockcorrectundo:
     description: 'Undo last correction.'
-    usage: /<command> [<radius>] [<force>]
+    usage: /<command> [<force>]
     permission: commandcorrect.undo
     aliases: [commandcorrectundo, ccu, cbcu]
