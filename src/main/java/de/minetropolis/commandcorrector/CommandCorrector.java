@@ -10,16 +10,26 @@ import org.bukkit.Location;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
+
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.HoverEvent;
+import net.md_5.bungee.api.chat.TextComponent;
 
 public class CommandCorrector extends JavaPlugin {
 
 	CommandblockCorrectCommand correctorCommand;
 	CommandblockFindCommand findCommand;
+	CommandblockUndoCommand undoCommand;
+	Corrections corrections = new Corrections();
+	Messenger messenger = new Messenger();
 
 	@Override
 	public void onEnable() {
-		correctorCommand = new CommandblockCorrectCommand(this);
+		correctorCommand = new CommandblockCorrectCommand(this, corrections);
+		undoCommand = new CommandblockUndoCommand(this, corrections);
 		findCommand = new CommandblockFindCommand(this);
 		saveDefaultConfig();
 		correctorCommand.setDefaultChangeRules(loadConfig());
@@ -55,39 +65,24 @@ public class CommandCorrector extends JavaPlugin {
 		StringBuilder stringBuilder = new StringBuilder();
 		Arrays.asList(args).forEach(arg -> stringBuilder.append(arg + " "));
 
-		String commandArgs = stringBuilder.toString();
+		String commandArgs = stringBuilder.toString().trim();
 
 		String[] splitArgs = commandArgs.split(";/");
-		switch (splitArgs.length) {
-		case 1:
-			processed.addAll(Arrays.asList(splitArgs[0].trim().split(" ")));
-			break;
-		case 2:
-			processed.addAll(Arrays.asList(splitArgs[0].trim()));
-			processed.addAll(Arrays.asList(splitArgs[1].trim()));
-			break;
-		case 3:
-			processed.addAll(Arrays.asList(splitArgs[0].trim()));
-			processed.addAll(Arrays.asList(splitArgs[1].trim()));
-			processed.addAll(Arrays.asList(splitArgs[2].trim()));
-			break;
-		default:
-			return null;
-		}
+		processed.addAll(Arrays.asList(splitArgs[0].trim().split(" ")));
+		for (int i = 1; i < splitArgs.length; i++)
+			processed.addAll(Arrays.asList(splitArgs[i].trim()));
 
 		return processed.toArray(new String[0]);
 	}
 
 	// TEST public
-	static String interpretPattern(String pattern) {
+	public static String interpretPattern(String pattern) {
 		List<int[]> groupPositions = findGroupPositions(pattern);
 		if (groupPositions == null) {
 			Bukkit.getLogger().log(Level.WARNING, "\"" + pattern + "\"" + " Has unbalanced brackets!");
 			return pattern;
 		}
-		pattern = escapeAll(pattern, groupPositions);
-
-		return pattern;
+		return escapeAll(pattern, groupPositions);
 	}
 
 	static List<int[]> findGroupPositions(String string) {
@@ -109,6 +104,7 @@ public class CommandCorrector extends JavaPlugin {
 			}
 			pos[1] = i - 1;
 			positions.add(pos);
+
 		}
 
 		return positions;
@@ -141,5 +137,35 @@ public class CommandCorrector extends JavaPlugin {
 			sender.sendMessage("This command is not supported for this sender.");
 		}
 		return location;
+	}
+
+	static String locationToString(Location location) {
+		return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
+				.append(location.getBlockZ()).toString();
+	}
+}
+
+class Messenger {
+	private CommandSender receiver;
+
+	public void setReceiver(CommandSender r) {
+		receiver = r;
+	}
+
+	public void reset() {
+		receiver = null;
+	}
+
+	public void message(String content, String hoverText, String command) {
+		if (receiver instanceof Player) {
+			TextComponent message = new TextComponent(content);
+			if (hoverText != null)
+				message.setHoverEvent(
+						new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create()));
+			if (command != null)
+				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+			receiver.spigot().sendMessage(message);
+		}
+		Bukkit.getLogger().log(Level.WARNING, "Couldn't send message to " + receiver.getName());
 	}
 }

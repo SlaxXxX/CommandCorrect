@@ -9,7 +9,7 @@ website: "${project.url}"
 commands:
   commandblockcorrect:
     description: 'Corrects command-blocks.'
-    usage: /<command> <radius> [<pattern> <target>]
+    usage: /<command> <radius | command> [<pattern> <target>]
     permission: commandcorrect.apply
     aliases: [commandcorrect, cc, cbc]
   commandblockcorrectorconfigreload:
@@ -22,3 +22,8 @@ commands:
     usage: /<command> <radius> <pattern>
     permission: commandcorrect.find
     aliases: [commandcorrectfind, ccf, cbcf]
+  commandblockcorrectundo:
+    description: 'Undo last correction.'
+    usage: /<command> [<radius>] [<force>]
+    permission: commandcorrect.undo
+    aliases: [commandcorrectundo, ccu, cbcu]

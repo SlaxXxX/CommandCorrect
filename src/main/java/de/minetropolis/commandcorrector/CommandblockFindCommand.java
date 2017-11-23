@@ -19,14 +19,21 @@ import java.util.*;
 
 public class CommandblockFindCommand implements CommandExecutor {
 
-    private final Plugin plugin;
+    private final CommandCorrector plugin;
 
-    public CommandblockFindCommand(Plugin plugin) {
+    public CommandblockFindCommand(CommandCorrector plugin) {
         this.plugin = Objects.requireNonNull(plugin);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    	plugin.messenger.setReceiver(sender);
+    	boolean result = doCommand(sender, command, label, args);
+    	plugin.messenger.reset();
+    	return result;
+    }
+    
+    public boolean doCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!sender.hasPermission("commandcorrect.find")) {
             sender.sendMessage("You don't have the required Permissions!");
             return true;
@@ -53,18 +60,16 @@ public class CommandblockFindCommand implements CommandExecutor {
         Set<Location> locations = findCommandblocks(location, radius, pattern);
 
         if (locations.size() > 0) {
-            if (sender instanceof Player) {
-                Player exactSender = (Player) sender;
+        	if (sender instanceof Player) {
                 for (Location loc : locations) {
-                    TextComponent message = new TextComponent("Found command at:" + locationToString(loc));
-                    message.setHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder("Teleport there!").create()));
-                    message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/tp @p" + locationToString(loc)));
-
-                    exactSender.spigot().sendMessage(message);
+                    plugin.messenger.message(
+                    		"Found command at:" + CommandCorrector.locationToString(loc), 
+                    		"Teleport there!", 
+                    		"/tp @p" + CommandCorrector.locationToString(loc));
                 }
             } else if (sender instanceof BlockCommandSender) {
                 StringBuilder message = new StringBuilder("Found command at:");
-                locations.forEach(loc -> message.append(locationToString(loc)).append(" ;"));
+                locations.forEach(loc -> message.append(CommandCorrector.locationToString(loc)).append(" ;"));
             }
         } else {
             sender.sendMessage("No command found.");
@@ -96,12 +101,5 @@ public class CommandblockFindCommand implements CommandExecutor {
 
     private boolean checkCommand(CommandBlock commandBlock, String pattern) {
         return commandBlock.getCommand().contains(pattern);
-    }
-
-    private String locationToString(Location location) {
-        return new StringBuilder(" ").append(location.getBlockX())
-                .append(" ").append(location.getBlockY())
-                .append(" ").append(location.getBlockZ())
-                .toString();
     }
 }
