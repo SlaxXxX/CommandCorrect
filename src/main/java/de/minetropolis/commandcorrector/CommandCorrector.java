@@ -55,11 +55,12 @@ public class CommandCorrector extends JavaPlugin {
 				.filter(plugin -> plugin instanceof WorldEditPlugin).findFirst().orElse(null);
 	}
 
-	public Map<String, String> loadConfig() {
-		Map<String, String> events = new HashMap<>();
+	public Map<String, List<String>> loadConfig() {
+		Map<String, List<String>> events = new HashMap<>();
 		getConfig().options().pathSeparator('\u02D9');
 		Set<String> keys = getConfig().getValues(false).keySet();
-		keys.stream().forEach(key -> events.put(interpretPattern(key), getConfig().getString(key, key)));
+		keys.stream().forEach(key -> events.put(interpretPattern(key), Arrays.asList(getConfig().getString(key + "\u02D9T", ""))));
+		events.keySet().stream().forEach(key -> events.get(key).add(getConfig().getString(key + "\u02D9A", "")));
 		return Collections.unmodifiableMap(events);
 	}
 
@@ -90,7 +91,7 @@ public class CommandCorrector extends JavaPlugin {
 	}
 
 	// TEST public
-	static String interpretPattern(String pattern) {
+	public static String interpretPattern(String pattern) {
 		List<int[]> groupPositions = findGroupPositions(pattern);
 		if (groupPositions == null) {
 			Bukkit.getLogger().log(Level.WARNING, "\"" + pattern + "\"" + " Has unbalanced brackets!");

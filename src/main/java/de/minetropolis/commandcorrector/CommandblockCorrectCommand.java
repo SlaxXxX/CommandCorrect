@@ -20,22 +20,24 @@ import net.md_5.bungee.api.chat.HoverEvent;
 public class CommandblockCorrectCommand implements CommandExecutor {
 
 	private final CommandCorrector plugin;
-	private Map<String, String> defaultChangeRules = Collections.emptyMap();
+	private Map<String, List<String>> defaultChangeRules = Collections.emptyMap();
 
 	public CommandblockCorrectCommand(CommandCorrector plugin) {
 		this.plugin = plugin;
 	}
 
-	public void setDefaultChangeRules(Map<String, String> changes) {
+	public void setDefaultChangeRules(Map<String, List<String>> changes) {
 		this.defaultChangeRules = new HashMap<>(Objects.requireNonNull(changes));
 		defaultChangeRules.remove(null);
 		defaultChangeRules.forEach((pattern, target) -> preventNull(pattern, target));
 	}
 
-	private void preventNull(String pattern, String target) {
-		if (target == null) {
-			defaultChangeRules.put(pattern, "");
+	//TODO does list even contain stuff?
+	private void preventNull(String pattern, List<String> target) {
+		if (target.get(0) == null) {
+			defaultChangeRules.put(pattern, Arrays.asList("", ""));
 		}
+
 	}
 
 	@Override
@@ -54,26 +56,30 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
 		args = CommandCorrector.process(args);
 
-		final Map<String, String> changeRules;
+		final Map<String, List<String>> changeRules;
 		Location min, max;
 		min = plugin.getBound(-1, args[0], sender);
 		max = plugin.getBound(1, args[0], sender);
 
 		switch (args.length) {
 		case 1:
-
-			changeRules = getChangeRule(null, null);
+			changeRules = getChangeRule(null, null, null);
 			break;
+		case 4:
 		case 3:
 			try {
 				if (!args[0].equals("selection"))
 					Math.abs(Integer.parseInt(args[0]));
 			} catch (NumberFormatException | NullPointerException ex) {
+				if (args.length == 3) {
+					args = Arrays.copyOf(args, 4);
+					args[3] = "";
+				}
 				sender.sendMessage("Result would be: " + notify(" LOCAL",
-						changeCommand(args[0], CommandCorrector.interpretPattern(args[1]), args[2])));
+						changeCommand(args[0], CommandCorrector.interpretPattern(args[1]), args[2], args[3])));
 				return true;
 			}
-			changeRules = getChangeRule(CommandCorrector.interpretPattern(args[1]), args[2]);
+			changeRules = getChangeRule(CommandCorrector.interpretPattern(args[1]), args[2], args[3]);
 			break;
 		default:
 			return false;
@@ -82,27 +88,25 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		if (min == null || max == null)
 			return false;
 
-		ChangeData changes = correctCommandblocks(min, max,
-				changeRules);
+		ChangeData changes = correctCommandblocks(min, max, changeRules);
 		plugin.getLogger().log(Level.INFO, "{0} has modified {1} commands from {2} of {3} commandblocks!",
-				new Object[] { sender.getName(), changes.getChangeRulesApplied(), changes.getChanged(),
-						changes.getAmount() });
+				new Object[] { sender.getName(), changes.getChangeRulesApplied(), changes.getChanged(), changes.getAmount() });
 		sender.sendMessage(changes.getChanged() + " / " + changes.getAmount() + " commandblocks were modified with "
 				+ changes.getChangeRulesApplied() + " modifications.");
 		return true;
 	}
 
-	private Map<String, String> getChangeRule(String pattern, String target) {
-		if (pattern != null && target != null && !pattern.isEmpty()) {
-			Map<String, String> changeRule = new HashMap<>();
-			changeRule.put(pattern, target);
+	private Map<String, List<String>> getChangeRule(String pattern, String target, String assertion) {
+		if (pattern != null && target != null && assertion != null && !pattern.isEmpty()) {
+			Map<String, List<String>> changeRule = new HashMap<>();
+			changeRule.put(pattern, Arrays.asList(target, assertion));
 			return changeRule;
 		} else {
 			return Collections.unmodifiableMap(defaultChangeRules);
 		}
 	}
 
-	private ChangeData correctCommandblocks(Location min, Location max, Map<String, String> changeRules) {
+	private ChangeData correctCommandblocks(Location min, Location max, Map<String, List<String>> changeRules) {
 		int blocksFound = 0;
 		int blocksChanged = 0;
 		Map<String, Integer> changes = new HashMap<>();
@@ -116,8 +120,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 					BlockState commandBlock = blockLocation.getBlock().getState();
 					if (commandBlock instanceof CommandBlock) {
 						blocksFound++;
-						Set<String> blockChanges = correctCommandblock((CommandBlock) commandBlock, changeRules,
-								correction);
+						Set<String> blockChanges = correctCommandblock((CommandBlock) commandBlock, changeRules, correction);
 						if (!blockChanges.isEmpty()) {
 							blocksChanged++;
 							for (String change : blockChanges) {
@@ -132,11 +135,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		return new ChangeData(blocksFound, blocksChanged, changes);
 	}
 
-	private void checkBlock(Location location) {
-
-	}
-
-	private Set<String> correctCommandblock(CommandBlock commandBlock, Map<String, String> changeRules,
+	private Set<String> correctCommandblock(CommandBlock commandBlock, Map<String, List<String>> changeRules,
 			Correction correction) {
 		Set<String> changes = new HashSet<>();
 		String command = commandBlock.getCommand();
@@ -144,7 +143,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		for (String pattern : changeRules.keySet()) {
 			String unchanged = changed;
 			changed = notify(CommandCorrector.locationToString(commandBlock.getLocation()),
-					changeCommand(changed, pattern, changeRules.get(pattern)));
+					changeCommand(changed, pattern, changeRules.get(pattern).get(0), changeRules.get(pattern).get(1)));
 			if (!changed.equals(unchanged))
 				changes.add(pattern);
 		}
@@ -161,7 +160,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	}
 
 	// TEST public
-	private String notify(String location, String pattern) {
+	public String notify(String location, String pattern) {
 		Matcher matcher = Pattern.compile(";!\\(([\\w ]*)\\)").matcher(pattern);
 		List<Integer> positions = new ArrayList<>();
 		List<String> messages = new ArrayList<>();
@@ -180,27 +179,31 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 							.append(">!<").append(ChatColor.RESET).append(pattern.substring(positions.get(i),
 									Math.min(positions.get(i) + 20, pattern.length())))
 							.toString();
-			plugin.messenger.message("CommandBlock at" + location +
-					" notifies: " + messages.get(i), 
-					HoverEvent.Action.SHOW_TEXT,
-					hoverText,
-					ClickEvent.Action.RUN_COMMAND,
-					"/tp @p" + location);
-			// System.out
-			// .println("CommandBlock at" + location + " notifies: " +
-			// messages.get(i) + " --> " + hoverText);
+			//			plugin.messenger.message("CommandBlock at" + location +
+			//					" notifies: " + messages.get(i),
+			//					HoverEvent.Action.SHOW_TEXT,
+			//					hoverText,
+			//					ClickEvent.Action.RUN_COMMAND,
+			//					"/tp @p" + location);
+			System.out.println("CommandBlock at" + location + " notifies: " + messages.get(i) + " --> " + hoverText);
 		}
 
 		return pattern;
 	}
 
 	// TEST public
-	private String changeCommand(String command, String pattern, String target) {
+	public String changeCommand(String command, String pattern, String target, String assertion) {
 		// TEST
-		// plugin.messenger.message((command + " ;; " + pattern + " ;; " +
-		// target), null, null);
-		// System.out.println(command + " ;; " + pattern + " ;; " + target);
-		// System.out.println(command);
+		//plugin.messenger.message((command + " ;; " + pattern + " ;; " + target), null, null, null, null);
+		System.out.println(command + " ;; " + pattern + " ;; " + target);
+		//System.out.println(command);
+
+		if (!assertion.equals("")) {
+			Matcher asserter = Pattern.compile(assertion).matcher(command);
+
+			if (asserter.find())
+				return command;
+		}
 
 		Matcher matcher = Pattern.compile(pattern).matcher(command);
 
