@@ -1,6 +1,5 @@
 package de.minetropolis.commandcorrector;
 
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -57,14 +56,15 @@ public class CommandblockUndoCommand implements CommandExecutor {
 			return;
 		}
 
+		
 		for (CommandData commandData : correction.getCorrections().keySet()) {
-			undos *= (undoCommandblock(commandData, force)) ? 1 : 0;
+			undos += (undoCommandblock(commandData, force)) ? 1 : 0;
 			plugin.messenger.message(
 					"Undid from " + correction.getCorrections().get(commandData) + " to " + commandData.getCommand() +
 							" in CB at:" + CommandCorrector.locationToString(commandData.getLocation()),
 					null, null);
 		}
-		plugin.messenger.message("Undid " + undos + " command changes", null, null);
+		plugin.messenger.message("Undid " + undos + " command changes from" + correction.getCorrections().size() + " Command-Blocks", null, null);
 		corrections.undone();
 	}
 

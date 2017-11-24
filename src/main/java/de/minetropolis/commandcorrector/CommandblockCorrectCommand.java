@@ -133,16 +133,20 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	private Set<String> correctCommandblock(CommandBlock commandBlock, Map<String, String> changeRules,
 			Correction correction) {
 		Set<String> changes = new HashSet<>();
+		String command = commandBlock.getCommand();
+		String changed = command;
 		for (String pattern : changeRules.keySet()) {
-			String command = commandBlock.getCommand();
-			String changed = changeCommand(command, pattern, changeRules.get(pattern));
-			if (!changed.equals(command)) {
-				commandBlock.setCommand(notify(CommandCorrector.locationToString(commandBlock.getLocation()), changed));
+			String unchanged = changed;
+			changed = notify(CommandCorrector.locationToString(commandBlock.getLocation()),
+					changeCommand(changed, pattern, changeRules.get(pattern)));
+			if (!changed.equals(unchanged))
 				changes.add(pattern);
-				correction.add(commandBlock.getLocation(), "", command, changed);
-			}
+		}
+		if (!changed.equals(command)) {
+			commandBlock.setCommand(changed);
 		}
 		if (commandBlock.update(true, false)) {
+			correction.add(commandBlock.getLocation(), "", command, changed);
 			return Collections.unmodifiableSet(changes);
 		} else {
 			plugin.getLogger().log(Level.WARNING, "Couldn't modify commandblock at {0}", commandBlock.getLocation());
@@ -151,7 +155,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	}
 
 	// TEST public
-	public String notify(String location, String pattern) {
+	private String notify(String location, String pattern) {
 		Matcher matcher = Pattern.compile(";!\\(([\\w ]*)\\)").matcher(pattern);
 		List<Integer> positions = new ArrayList<>();
 		List<String> messages = new ArrayList<>();
@@ -182,7 +186,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	}
 
 	// TEST public
-	public String changeCommand(String command, String pattern, String target) {
+	private String changeCommand(String command, String pattern, String target) {
 		// TEST
 		// plugin.messenger.message((command + " ;; " + pattern + " ;; " +
 		// target), null, null);

@@ -78,7 +78,7 @@ public class CommandCorrector extends JavaPlugin {
     }
 
     // TEST public
-    public static String interpretPattern(String pattern) {
+    static String interpretPattern(String pattern) {
         List<int[]> groupPositions = findGroupPositions(pattern);
         if (groupPositions == null) {
             Bukkit.getLogger().log(Level.WARNING, "\"" + pattern + "\"" + " Has unbalanced brackets!");

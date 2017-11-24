@@ -20,14 +20,14 @@ public class CommandTester {
 	}
 
 	private CommandTester() {
-		CommandblockCorrectCommand cbc = new CommandblockCorrectCommand(null,null);
-
-		for (int i = 0; i < commands.length; i++) {
-			for (String[] rule : rules) {
-				commands[i] = cbc.notify(" TEST", cbc.changeCommand(commands[i], CommandCorrector.interpretPattern(rule[0]), rule[1]));
-				System.out.println(commands[i] + "\n");
-			}
-			System.out.println("\n--------------\n");
-		}
+//		CommandblockCorrectCommand cbc = new CommandblockCorrectCommand(null,null);
+//
+//		for (int i = 0; i < commands.length; i++) {
+//			for (String[] rule : rules) {
+//				commands[i] = cbc.notify(" TEST", cbc.changeCommand(commands[i], CommandCorrector.interpretPattern(rule[0]), rule[1]));
+//				System.out.println(commands[i] + "\n");
+//			}
+//			System.out.println("\n--------------\n");
+//		}
 	}
 }
