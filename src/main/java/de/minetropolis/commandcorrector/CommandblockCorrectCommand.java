@@ -14,6 +14,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import de.minetropolis.commandcorrector.Corrections.Correction;
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
 
 public class CommandblockCorrectCommand implements CommandExecutor {
 
@@ -179,7 +181,10 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 									Math.min(positions.get(i) + 20, pattern.length())))
 							.toString();
 			plugin.messenger.message("CommandBlock at" + location +
-					" notifies: " + messages.get(i), hoverText,
+					" notifies: " + messages.get(i), 
+					HoverEvent.Action.SHOW_TEXT,
+					hoverText,
+					ClickEvent.Action.RUN_COMMAND,
 					"/tp @p" + location);
 			// System.out
 			// .println("CommandBlock at" + location + " notifies: " +

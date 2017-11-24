@@ -9,6 +9,9 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import net.md_5.bungee.api.chat.ClickEvent;
+import net.md_5.bungee.api.chat.HoverEvent;
+
 import java.util.*;
 
 public class CommandblockFindCommand implements CommandExecutor {
@@ -34,31 +37,27 @@ public class CommandblockFindCommand implements CommandExecutor {
         }
 
         args = CommandCorrector.process(args);
-		if (args == null) {
-			sender.sendMessage("wrong ;/ count. use either 0 or 1");
+		if (args == null ||args.length != 2)
 			return false;
-		}
 
-        if (args.length != 2) {
-            return false;
-        }
-
-        final int radius = CommandCorrector.getRadius(args[0]);
+		Location min,max;
+		min = plugin.getBound(-1, args[0], sender);
+		max = plugin.getBound(1, args[0], sender);
         final String pattern = args[1];
+        
+		if (min == null || max == null)
+			return false;
 
-        final Location location = CommandCorrector.getLocation(sender);
-
-        if (location == null)
-            return false;
-
-        Set<Location> locations = findCommandblocks(location, radius, pattern);
+        Set<Location> locations = findCommandblocks(min, max, pattern);
 
         if (locations.size() > 0) {
         	if (sender instanceof Player) {
                 for (Location loc : locations) {
                     plugin.messenger.message(
-                    		"Found command at:" + CommandCorrector.locationToString(loc), 
+                    		"Found command at:" + CommandCorrector.locationToString(loc),
+                    		HoverEvent.Action.SHOW_TEXT,
                     		"Teleport there!", 
+                    		ClickEvent.Action.RUN_COMMAND,
                     		"/tp @p" + CommandCorrector.locationToString(loc));
                 }
             } else if (sender instanceof BlockCommandSender) {
@@ -72,15 +71,15 @@ public class CommandblockFindCommand implements CommandExecutor {
         return true;
     }
 
-    private Set<Location> findCommandblocks(Location center, int radius, String pattern) {
+    private Set<Location> findCommandblocks(Location min, Location max, String pattern) {
 
         Set<Location> locations = new HashSet<>();
 
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = Math.max(-radius, -center.getBlockY()); y <= Math.min(radius, 255 - center.getBlockY()); y++) {
-                for (int z = -radius; z <= radius; z++) {
+		for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {
+			for (int y = min.getBlockY(); y <= max.getBlockY(); y++) {
+				for (int z = min.getBlockZ(); z <= max.getBlockZ(); z++) {
 
-                    Location blockLocation = center.clone().add(x, y, z);
+					Location blockLocation = new Location(min.getWorld(), x, y, z);
                     BlockState commandBlock = blockLocation.getBlock().getState();
 
                     if (commandBlock instanceof CommandBlock)

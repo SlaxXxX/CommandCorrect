@@ -175,18 +175,27 @@ public class CommandCorrector extends JavaPlugin {
 			return null;
 		int radius = getRadius(delta);
 		return new Location(origin.getWorld(), origin.getBlockX() + (radius * scale),
-				origin.getBlockY() + Math.min(Math.max((radius * scale), 0), 255), origin.getBlockZ() + (radius * scale));
+				origin.getBlockY() + Math.min(Math.max((radius * scale), 0), 255),
+				origin.getBlockZ() + (radius * scale));
 	}
 
 	private boolean assertSelection(CommandSender sender) {
-		if (sender instanceof Player) {
-			if (worldedit.getSelection((Player) sender) != null) {
-				return true;
+		if (worldedit == null) {
+			if (sender instanceof Player) {
+				if (worldedit.getSelection((Player) sender) != null) {
+					return true;
+				} else {
+					messenger.message("You don't have a selection!", null, null, null, null);
+				}
 			} else {
-				messenger.message("You don't have a selection!", null, null);
+				Bukkit.getLogger().log(Level.WARNING, "CommandSender can't use Worldedit selection parameter");
 			}
 		} else {
-			Bukkit.getLogger().log(Level.WARNING, "CommandSender can't use Worldedit selection parameter");
+			messenger.message("No Worldedit plugin found. >click<",
+					HoverEvent.Action.SHOW_TEXT, 
+					"Get World-Edit here!",
+					ClickEvent.Action.OPEN_URL,
+					"https://dev.bukkit.org/projects/worldedit/files");
 		}
 		return false;
 	}
@@ -203,7 +212,7 @@ class Messenger {
 		receiver = null;
 	}
 
-	public void message(String content, String hoverText, String command) {
+	public void message(String content, HoverEvent.Action hoverAction, String hoverText, ClickEvent.Action clickAction, String command) {
 		if (receiver instanceof Player) {
 			TextComponent message = new TextComponent(content);
 			if (hoverText != null)
