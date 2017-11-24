@@ -209,11 +209,14 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
 		if (!matcher.find())
 			return command;
-
-		String changed = command.replace(matcher.group(0), target);
-		for (int i = 1; i <= matcher.groupCount(); i++) {
-			changed = changed.replace(";:(" + i + ")", matcher.group(i));
-		}
+		
+		String changed = command;
+		do {
+			changed = changed.replace(matcher.group(0), target);
+			for (int i = 1; i <= matcher.groupCount(); i++) {
+				changed = changed.replace(";:(" + i + ")", matcher.group(i));
+			}
+		} while (matcher.find());
 
 		return changed;
 	}
