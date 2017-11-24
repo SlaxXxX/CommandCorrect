@@ -18,12 +18,10 @@ import de.minetropolis.commandcorrector.Corrections.Correction;
 public class CommandblockCorrectCommand implements CommandExecutor {
 
 	private final CommandCorrector plugin;
-	private Corrections corrections;
 	private Map<String, String> defaultChangeRules = Collections.emptyMap();
 
-	public CommandblockCorrectCommand(CommandCorrector plugin, Corrections corrections) {
+	public CommandblockCorrectCommand(CommandCorrector plugin) {
 		this.plugin = plugin;
-		this.corrections = corrections;
 	}
 
 	public void setDefaultChangeRules(Map<String, String> changes) {
@@ -54,17 +52,20 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
 		args = CommandCorrector.process(args);
 
-		final int radius;
 		final Map<String, String> changeRules;
+		Location min, max;
+		min = plugin.getBound(-1, args[0], sender);
+		max = plugin.getBound(1, args[0], sender);
 
 		switch (args.length) {
 		case 1:
-			radius = CommandCorrector.getRadius(args[0]);
+
 			changeRules = getChangeRule(null, null);
 			break;
 		case 3:
 			try {
-				radius = Math.abs(Integer.parseInt(args[0]));
+				if (!args[0].equals("selection"))
+					Math.abs(Integer.parseInt(args[0]));
 			} catch (NumberFormatException | NullPointerException ex) {
 				sender.sendMessage("Result would be: " + notify(" LOCAL",
 						changeCommand(args[0], CommandCorrector.interpretPattern(args[1]), args[2])));
@@ -76,12 +77,11 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			return false;
 		}
 
-		final Location location = CommandCorrector.getLocation(sender);
-
-		if (location == null)
+		if (min == null || max == null)
 			return false;
 
-		ChangeData changes = correctCommandblocks(location, radius, changeRules);
+		ChangeData changes = correctCommandblocks(min, max,
+				changeRules);
 		plugin.getLogger().log(Level.INFO, "{0} has modified {1} commands from {2} of {3} commandblocks!",
 				new Object[] { sender.getName(), changes.getChangeRulesApplied(), changes.getChanged(),
 						changes.getAmount() });
@@ -100,17 +100,17 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		}
 	}
 
-	private ChangeData correctCommandblocks(Location center, int radius, Map<String, String> changeRules) {
+	private ChangeData correctCommandblocks(Location min, Location max, Map<String, String> changeRules) {
 		int blocksFound = 0;
 		int blocksChanged = 0;
 		Map<String, Integer> changes = new HashMap<>();
-		Correction correction = corrections.makeNew();
+		Correction correction = plugin.corrections.makeNew();
 
-		for (int x = -radius; x <= radius; x++) {
-			for (int y = Math.max(-radius, -center.getBlockY()); y <= Math.min(radius, 255 - center.getBlockY()); y++) {
-				for (int z = -radius; z <= radius; z++) {
+		for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {
+			for (int y = min.getBlockY(); y <= max.getBlockY(); y++) {
+				for (int z = min.getBlockZ(); z <= max.getBlockZ(); z++) {
 
-					Location blockLocation = center.clone().add(x, y, z);
+					Location blockLocation = new Location(min.getWorld(), x, y, z);
 					BlockState commandBlock = blockLocation.getBlock().getState();
 					if (commandBlock instanceof CommandBlock) {
 						blocksFound++;
@@ -128,6 +128,10 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			}
 		}
 		return new ChangeData(blocksFound, blocksChanged, changes);
+	}
+
+	private void checkBlock(Location location) {
+
 	}
 
 	private Set<String> correctCommandblock(CommandBlock commandBlock, Map<String, String> changeRules,

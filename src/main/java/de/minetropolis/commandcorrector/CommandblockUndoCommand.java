@@ -16,11 +16,9 @@ import java.util.*;
 public class CommandblockUndoCommand implements CommandExecutor {
 
 	private final CommandCorrector plugin;
-	private Corrections corrections;
 
-	public CommandblockUndoCommand(CommandCorrector plugin, Corrections corrections) {
+	public CommandblockUndoCommand(CommandCorrector plugin) {
 		this.plugin = Objects.requireNonNull(plugin);
-		this.corrections = Objects.requireNonNull(corrections);
 	}
 
 	@Override
@@ -49,7 +47,7 @@ public class CommandblockUndoCommand implements CommandExecutor {
 	}
 
 	private void undoCommandblocks(boolean force) {
-		Correction correction = corrections.getLast();
+		Correction correction = plugin.corrections.getLast();
 		int undos = 0;
 		if (correction == null) {
 			plugin.messenger.message("Nothing to undo", null, null);
@@ -65,7 +63,7 @@ public class CommandblockUndoCommand implements CommandExecutor {
 					null, null);
 		}
 		plugin.messenger.message("Undid " + undos + " command changes from" + correction.getCorrections().size() + " Command-Blocks", null, null);
-		corrections.undone();
+		plugin.corrections.undone();
 	}
 
 	private boolean undoCommandblock(CommandData commandData, boolean force) {
