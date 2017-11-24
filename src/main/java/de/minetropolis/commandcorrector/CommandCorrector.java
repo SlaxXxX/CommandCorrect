@@ -45,6 +45,7 @@ public class CommandCorrector extends JavaPlugin {
 
     public Map<String, String> loadConfig() {
         Map<String, String> events = new HashMap<>();
+        getConfig().options().pathSeparator('\u02D9');
         Set<String> keys = getConfig().getValues(false).keySet();
         keys.stream().forEach(key -> events.put(interpretPattern(key), getConfig().getString(key, key)));
         return Collections.unmodifiableMap(events);
