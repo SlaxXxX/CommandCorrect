@@ -1,3 +1,0 @@
-Janis is working at Arvato! (Test) -Permanent-
-/summon horse ~-2 ~2 ~ {Tags:[\"TestTag!\"]}
-/execute @e[score_test_min=1, test, score_test=5]

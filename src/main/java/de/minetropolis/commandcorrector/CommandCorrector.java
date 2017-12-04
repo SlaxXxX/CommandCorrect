@@ -1,7 +1,15 @@
 package de.minetropolis.commandcorrector;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.nio.file.CopyOption;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -35,8 +43,7 @@ public class CommandCorrector extends JavaPlugin {
 		correctorCommand = new CommandblockCorrectCommand(this);
 		undoCommand = new CommandblockUndoCommand(this);
 		findCommand = new CommandblockFindCommand(this);
-		saveDefaultConfig();
-		correctorCommand.setDefaultChangeRules(loadConfig());
+		reloadConfig();
 		getCommand("commandblockcorrect").setExecutor(correctorCommand);
 		getCommand("commandblockcorrectfind").setExecutor(findCommand);
 		getCommand("commandblockcorrectundo").setExecutor(undoCommand);
@@ -45,23 +52,56 @@ public class CommandCorrector extends JavaPlugin {
 
 	@Override
 	public void reloadConfig() {
-		super.reloadConfig();
 		correctorCommand.setDefaultChangeRules(loadConfig());
+	}
+
+	public Map<String, List<String>> loadConfig() {
+		//		Map<String, List<String>> events = new HashMap<>();
+		//		getConfig().options().pathSeparator('\u02D9');
+		//		Set<String> keys = getConfig().getValues(false).keySet();
+		//		keys.stream().forEach(key -> events.put(interpretPattern(key), Arrays.asList(getConfig().getString(key + "\u02D9T", ""))));
+		//		events.keySet().stream().forEach(key -> events.get(key).add(getConfig().getString(key + "\u02D9A", "")));
+		//		return Collections.unmodifiableMap(events);
+		File jar = null;
+		try {
+			jar = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
+		} catch (URISyntaxException e1) {
+			e1.printStackTrace();
+		}
+		File config = new File(new File(jar.getParentFile().toURI().getPath(), this.getName()).toURI().getPath(), "config.yml");
+
+		if (!config.exists() || config.isDirectory()) {
+			config.getParentFile().mkdirs();
+			try {
+				Files.copy(new File(jar, "config.yml").toPath(), config.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+		try {
+			StringBuilder sb = new StringBuilder();
+			Files.readAllLines(config.toPath()).stream().filter(string -> !string.startsWith("#")).forEach(string -> sb.append(string).append("\n"));
+			return processFile(sb.toString());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		return Collections.emptyMap();
+	}
+
+	private Map<String, List<String>> processFile(String string) {
+		Map<String, List<String>> map = new HashMap<>();
+		Matcher matcher = Pattern.compile("[ \\n\\t]*\\\"(.+)\\\"[ \\n\\t]*:[ \\n\\t]*\\\"(.+)\\\"[ \\n\\t]*\\|[ \\n\\t]*\\\"(.*)\\\"").matcher(string);
+		while(matcher.find()) {
+			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[]{matcher.group(2),matcher.group(3)})));
+		}
+		return map;
 	}
 
 	private WorldEditPlugin findWorldEdit() {
 		PluginManager pluginManager = Bukkit.getPluginManager();
 		return (WorldEditPlugin) Arrays.asList(pluginManager.getPlugins()).stream()
-				.filter(plugin -> plugin instanceof WorldEditPlugin).findFirst().orElse(null);
-	}
-
-	public Map<String, List<String>> loadConfig() {
-		Map<String, List<String>> events = new HashMap<>();
-		getConfig().options().pathSeparator('\u02D9');
-		Set<String> keys = getConfig().getValues(false).keySet();
-		keys.stream().forEach(key -> events.put(interpretPattern(key), Arrays.asList(getConfig().getString(key + "\u02D9T", ""))));
-		events.keySet().stream().forEach(key -> events.get(key).add(getConfig().getString(key + "\u02D9A", "")));
-		return Collections.unmodifiableMap(events);
+			.filter(plugin -> plugin instanceof WorldEditPlugin).findFirst().orElse(null);
 	}
 
 	static int getRadius(String radius) {
@@ -156,7 +196,7 @@ public class CommandCorrector extends JavaPlugin {
 
 	static String locationToString(Location location) {
 		return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
-				.append(location.getBlockZ()).toString();
+			.append(location.getBlockZ()).toString();
 	}
 
 	Location getBound(int scale, String delta, CommandSender sender) {
@@ -176,8 +216,8 @@ public class CommandCorrector extends JavaPlugin {
 			return null;
 		int radius = getRadius(delta);
 		return new Location(origin.getWorld(), origin.getBlockX() + (radius * scale),
-				origin.getBlockY() + Math.min(Math.max((radius * scale), 0), 255),
-				origin.getBlockZ() + (radius * scale));
+			origin.getBlockY() + Math.min(Math.max((radius * scale), 0), 255),
+			origin.getBlockZ() + (radius * scale));
 	}
 
 	private boolean assertSelection(CommandSender sender) {
@@ -193,10 +233,10 @@ public class CommandCorrector extends JavaPlugin {
 			}
 		} else {
 			messenger.message("No Worldedit plugin found. >click<",
-					HoverEvent.Action.SHOW_TEXT, 
-					"Get World-Edit here!",
-					ClickEvent.Action.OPEN_URL,
-					"https://dev.bukkit.org/projects/worldedit/files");
+				HoverEvent.Action.SHOW_TEXT,
+				"Get World-Edit here!",
+				ClickEvent.Action.OPEN_URL,
+				"https://dev.bukkit.org/projects/worldedit/files");
 		}
 		return false;
 	}
@@ -218,7 +258,7 @@ class Messenger {
 			TextComponent message = new TextComponent(content);
 			if (hoverText != null)
 				message.setHoverEvent(
-						new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create()));
+					new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create()));
 			if (command != null)
 				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
 			receiver.spigot().sendMessage(message);

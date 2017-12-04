@@ -1,3 +1,29 @@
-"pattern (Don't use this, write your own!)":
-	T: ""
-	A: ""
+"pattern" : "replacement" | "assertion"
+
+"pattern" : "replacement" | 
+
+"pattern": "replacement" |"assertion"
+
+"pattern":
+"replacement"|
+"assertion"
+
+"pattern"
+: "replacement"
+| "assertion"
+
+all of the above are valid.
+everything that is not, will be ignored.
+
+# you may or may not use yaml comments, whichever you prefer
+
+invalid is for example:
+
+pattern : replacement | assertion
+--> missing quotes
+
+"pattern" | "assertion"
+--> no replacement (no ':' to be exact)
+
+# "pattern": "replacement" |"assertion"
+--> it's commented
