@@ -1,6 +1,6 @@
 "pattern" : "replacement" | "assertion"
 
-"pattern" : "replacement" | 
+"pattern2" : "replacement" |
 
 "pattern": "replacement" |"assertion"
 
@@ -12,18 +12,25 @@
 : "replacement"
 | "assertion"
 
+"pattern6":
+	"replacement"	|	"assertion"
+
+
 all of the above are valid.
 everything that is not, will be ignored.
 
 # you may or may not use yaml comments, whichever you prefer
+# duplicate patterns will be removed (so the first one is the one that counts).
+# so effectively this config contains 4 entries: pattern, pattern 2, pattern 6.
+
 
 invalid is for example:
 
 pattern : replacement | assertion
---> missing quotes
+#--> missing quotes
 
 "pattern" | "assertion"
---> no replacement (no ':' to be exact)
+#--> no replacement (no ':' to be exact)
 
 # "pattern": "replacement" |"assertion"
---> it's commented
+#--> it's commented

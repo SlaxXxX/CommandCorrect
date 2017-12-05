@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.logging.Level;
@@ -56,24 +57,18 @@ public class CommandCorrector extends JavaPlugin {
 	}
 
 	public Map<String, List<String>> loadConfig() {
-		//		Map<String, List<String>> events = new HashMap<>();
-		//		getConfig().options().pathSeparator('\u02D9');
-		//		Set<String> keys = getConfig().getValues(false).keySet();
-		//		keys.stream().forEach(key -> events.put(interpretPattern(key), Arrays.asList(getConfig().getString(key + "\u02D9T", ""))));
-		//		events.keySet().stream().forEach(key -> events.get(key).add(getConfig().getString(key + "\u02D9A", "")));
-		//		return Collections.unmodifiableMap(events);
 		File jar = null;
 		try {
 			jar = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
 		}
-		File config = new File(new File(jar.getParentFile().toURI().getPath(), this.getName()).toURI().getPath(), "config.yml");
+		File config = new File(new File(jar.getParentFile().toURI().getPath(), "TEST").toURI().getPath(), "config.yml");
 
 		if (!config.exists() || config.isDirectory()) {
 			config.getParentFile().mkdirs();
 			try {
-				Files.copy(new File(jar, "config.yml").toPath(), config.toPath(), StandardCopyOption.COPY_ATTRIBUTES);
+				Files.copy(getClass().getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -91,7 +86,7 @@ public class CommandCorrector extends JavaPlugin {
 
 	private Map<String, List<String>> processFile(String string) {
 		Map<String, List<String>> map = new HashMap<>();
-		Matcher matcher = Pattern.compile("[ \\n\\t]*\\\"(.+)\\\"[ \\n\\t]*:[ \\n\\t]*\\\"(.+)\\\"[ \\n\\t]*\\|[ \\n\\t]*\\\"(.*)\\\"").matcher(string);
+		Matcher matcher = Pattern.compile("[ \\n\\t]*\\\"(.+)\\\"[ \\n\\t]*:[ \\n\\t]*\\\"(.*)\\\"[ \\n\\t]*\\|(?:[ \\n\\t]*\\\"(.*)\\\")?").matcher(string);
 		while(matcher.find()) {
 			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[]{matcher.group(2),matcher.group(3)})));
 		}

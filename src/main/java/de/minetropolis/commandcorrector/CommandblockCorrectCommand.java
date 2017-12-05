@@ -201,8 +201,10 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		if (!assertion.equals("")) {
 			Matcher asserter = Pattern.compile(assertion).matcher(command);
 
-			if (asserter.find())
+			if (asserter.find()) {
+				//System.out.println("Assertion matched!");
 				return command;
+			}
 		}
 
 		Matcher matcher = Pattern.compile(pattern).matcher(command);
