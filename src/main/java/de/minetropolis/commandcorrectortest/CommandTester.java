@@ -29,16 +29,16 @@ public class CommandTester {
 		//			"setblock ~1 ~5 ~3 command_block 2 replace",
 		//			"setblock 14 -39 118 minecraft:stone facing=north"
 
-		"@a[test1,score_test_min=-1,test2,score_test=3,test3]",
-		"@e[score_test=43, test1,score_test_min=2,test2]",
-		"@r[test1,score_test=1]",
-		"@p[score_test_min=14]",
-		"@a[scores=[nochntest=3..],test1,score_test_min=1,test2,score_test=3,test3]",
-		"@e[scores=[nochntest=1],score_test=43, test1,score_test_min=2,test2]",
-		"@r[test1,scores=[nochntest=3..36],test2,score_test=1]",
-		"@p[scores=[nochntest=..6],score_test_min=14]",
-		"@a[test1,score_test_min=-1,test2,score_test=3,test3,score_nochntest=2,test4,score_nochntest_min=1,test5,score_wienochntest=4,test6,score_letztertest_min=-13,score_letztertest=48,test7]"
-		
+		//		"@a[test1,score_test_min=-1,test2,score_test=3,test3]",
+		//		"@e[score_test=43, test1,score_test_min=2,test2]",
+		//		"@r[test1,score_test=1]",
+		//		"@p[score_test_min=14]",
+		//		"@a[test1,score_test_min=1,test2,score_test=3,test3,scores=[nochntest=3..],test4]",
+		//		"@e[score_test=43, test1,score_test_min=2,scores=[nochntest=1],test2]",
+		//		"@r[test1,test2,score_test=1,scores=[nochntest=3..36]]",
+		//		"@p[score_test_min=14,scores=[nochntest=..6]]",
+		"@a[test1,score_test_min=-1,test2,score_test=3,test3,score_nochntest=2,test4,score_nochntest_min=1,test5,score_wienochntest=4,test6,score_letztertest_min=-13,score_letztertest=48,test7,score_jetzaberletztertest_min=0,test8,score_jetzaberletztertest=1,test9]"
+
 	};
 	private String[][] rules = {
 		//			{
@@ -46,13 +46,13 @@ public class CommandTester {
 		//					"setblock ;:(1);:(2)[;!(Add Block State);:(3)];:(5) ;:(4)"
 		//			}
 		{
-			"@;?(\\w)[;?(.*)score_;?(\\w+)_min=;?(-?\\d+);?(.*);?(?:, *)score_;?(?:\\3)=;?(-?\\d+);?(.*)]",
-			"@;:(1)[;:(2)scores=[;:(3)=;:(4)..;:(6)];:(5);:(7)]",
+			"@;?(\\w)[;?(.*)score_;?(\\w+)_min=;?(-?\\d+);?(?:, *);?(.*)score_;?(?:\\3)=;?(-?\\d+);?(.*)]",
+			"@;:(1)[;:(2);:(5)scores=[;:(3)=;:(4)..;:(6)];:(7)]",
 			"(scores=\\[.*\\])"
 		},
 		{
-			"@;?(\\w)[;?(.*)score_;?(\\w+)=;?(-?\\d+);?(.*);?(?:, *)score_;?(?:\\3)_min=;?(-?\\d+);?(.*)]",
-			"@;:(1)[;:(2)scores=[;:(3)=;:(6)..;:(4)];:(5);:(7)]",
+			"@;?(\\w)[;?(.*)score_;?(\\w+)=;?(-?\\d+);?(?:, *);?(.*)score_;?(?:\\3)_min=;?(-?\\d+);?(.*)]",
+			"@;:(1)[;:(2);:(5)scores=[;:(3)=;:(6)..;:(4)];:(7)]",
 			"(scores=\\[.*\\])"
 		},
 		{
@@ -66,23 +66,23 @@ public class CommandTester {
 			"(scores=\\[.*\\])|(score_\\w+_min=-?\\d+)"
 		},
 		{
-			"@;?(\\w)[;?(.*);?(scores=\\[.*)];?(.*);?(?:, *)score_;?(\\w+)_min=;?(-?\\d+);?(.*);?(?:, *)score_;?(?:\\5)=;?(-?\\d+);?(.*)]",
-			"@;:(1)[;:(2);:(3),;:(5)=;:(6)..;:(8)];:(4);:(7);:(9)]",
+			"@;?(\\w)[;?(.*)score_;?(\\w+)_min=;?(-?\\d+);?(?: *,);?(.*)score_;?(?:\\3)=;?(-?\\d+);?(?: *,);?(.*);?(scores=\\[.*)];?(.*)]",
+			"@;:(1)[;:(2);:(5);:(7);:(8),;:(3)=;:(4)..;:(6)];:(9)]",
 			""
 		},
 		{
-			"@;?(\\w)[;?(.*);?(scores=\\[.*)];?(.*);?(?:, *)score_;?(\\w+)=;?(-?\\d+);?(.*);?(?:, *)score_;?(?:\\5)_min=;?(-?\\d+);?(.*)]",
-			"@;:(1)[;:(2);:(3),;:(5)=;:(8)..;:(6)];:(4);:(7);:(9)]",
+			"@;?(\\w)[;?(.*)score_;?(\\w+)=;?(-?\\d+);?(?: *,);?(.*)score_;?(?:\\3)_min=;?(-?\\d+);?(?: *,);?(.*);?(scores=\\[.*)];?(.*)]",
+			"@;:(1)[;:(2);:(5);:(7);:(8),;:(3)=;:(6)..;:(4)];:(9)]",
 			""
 		},
 		{
-			"@;?(\\w)[;?(.*);?(scores=\\[.*)];?(.*);?(?:, *)score_;?(\\w+)_min=;?(-?\\d+);?(.*);?(.*)]",
-			"@;:(1)[;:(2);:(3),;:(5)=;:(6)..];:(4);:(7)]",
+			"@;?(\\w)[;?(.*)score_;?(\\w+)_min=;?(-?\\d+);?(?: *,);?(.*);?(scores=\\[.*)];?(.*)]",
+			"@;:(1)[;:(2);:(5);:(6),;:(3)=;:(4)..];:(7)]",
 			"(score_\\w+(?!_min).{4}=-?\\d+)"
 		},
 		{
-			"@;?(\\w)[;?(.*);?(scores=\\[.*)];?(.*);?(?:, *)score_;?(\\w+)=;?(-?\\d+);?(.*);?(.*)]",
-			"@;:(1)[;:(2);:(3),;:(5)=..;:(6)];:(4);:(7)]",
+			"@;?(\\w)[;?(.*)score_;?(\\w+)=;?(-?\\d+);?(?: *,);?(.*);?(scores=\\[.*)];?(.*)]",
+			"@;:(1)[;:(2);:(5);:(6),;:(3)=;:(4)..];:(7)]",
 			"(score_\\w+_min=-?\\d+)"
 		}
 	};
@@ -107,7 +107,7 @@ public class CommandTester {
 				System.out.println("\n--------------\n");
 			}
 		}
-		
+
 		System.out.println("\n----- END RESULT -----\n");
 		Arrays.asList(commands).forEach(System.out::println);
 	}

@@ -1,27 +1,35 @@
-"pattern" : "replacement" | "assertion"
+"$pattern" : "replacement" | "assertion"
 
-"pattern2" : "replacement" |
+"$pattern2" : "replacement" | ""
 
-"pattern": "replacement" |"assertion"
+"$pattern": "replacement" |"assertion"
 
-"pattern":
+"$pattern":
 "replacement"|
 "assertion"
 
-"pattern"
-: "replacement"
-| "assertion"
+"$pattern"
+    : "replacement"
+    | "assertion"
 
-"pattern6":
+"$pattern3":
 	"replacement"	|	"assertion"
 
+"$pattern4"
+:
+"replacement"
+|
+"assertion"
 
 all of the above are valid.
-everything that is not, will be ignored.
+everything that is not, will be ignored. (basically everything from now on)
+NOTE: the '$' before the pattern makes sure, that noone unknowingly replaces all occurences of "pattern" in your commandblocks
+    (by just typing /cc <radius> without setting up the config and specifying rules in chat)
+	(i just assumed "$pattern" is unlikely to be found in a commandblock)
 
 # you may or may not use yaml comments, whichever you prefer
 # duplicate patterns will be removed (so the first one is the one that counts).
-# so effectively this config contains 4 entries: pattern, pattern 2, pattern 6.
+# so effectively this config contains 4 entries: $pattern, $pattern2, $pattern3, $pattern4.
 
 
 invalid is for example:
@@ -29,8 +37,30 @@ invalid is for example:
 pattern : replacement | assertion
 #--> missing quotes
 
-"pattern" | "assertion"
-#--> no replacement (no ':' to be exact)
+"pattern" : "replacement"
+#--> no assertion
 
-# "pattern": "replacement" |"assertion"
+"pattern" | "assertion"
+#--> no replacement
+
+"pattern" | "assertion" : "replacement"
+#--> wrong order
+
+# "pattern" : "replacement" | "assertion"
 #--> it's commented
+
+hello there "pattern" : "replacement" | "assertion"
+#--> has to start with arrangement of whitespaces followed by a quotation mark
+    #--> valid is any combination of ' ' and '\t' before the entry
+    
+"pattern":
+
+	"replacement" | "assertion"
+#--> too many line breaks. to prevent unwanted entrys from syntax errors of previous lines
+	#--> for maximum line spacing see $pattern4.
+    
+    
+    
+    
+NOTE: if you really want the exact syntax requirement for these entrys, have the regex pattern it's matched with:
+#--> (?:^|\n)[ \t]*\"(.+)\"[ \t]*\n?:[ \t]*\n?\"(.*)\"[ \t]*\n?\|[ \t]*\n?\"(.*)\"

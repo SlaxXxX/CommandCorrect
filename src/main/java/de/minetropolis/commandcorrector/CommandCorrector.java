@@ -86,7 +86,7 @@ public class CommandCorrector extends JavaPlugin {
 
 	private Map<String, List<String>> processFile(String string) {
 		Map<String, List<String>> map = new HashMap<>();
-		Matcher matcher = Pattern.compile("[ \\n\\t]*\\\"(.+)\\\"[ \\n\\t]*:[ \\n\\t]*\\\"(.*)\\\"[ \\n\\t]*\\|(?:[ \\n\\t]*\\\"(.*)\\\")?").matcher(string);
+		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?\\\"(.*)\\\"[ \\t]*\\n?\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
 		while(matcher.find()) {
 			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[]{matcher.group(2),matcher.group(3)})));
 		}
