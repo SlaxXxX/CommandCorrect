@@ -1,21 +1,11 @@
 package de.minetropolis.commandcorrector;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.Arrays;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -83,7 +73,7 @@ public class CommandCorrector extends JavaPlugin {
 		} catch (NumberFormatException | NullPointerException ex) {
 			return null;
 		}
-		
+
 		return new Location(origin.getWorld(), origin.getBlockX() + (radius * scale),
 			origin.getBlockY() + Math.min(Math.max((radius * scale), 0), 255),
 			origin.getBlockZ() + (radius * scale));
@@ -95,7 +85,7 @@ public class CommandCorrector extends JavaPlugin {
 				if (worldedit.getSelection((Player) sender) != null) {
 					return true;
 				} else {
-					messenger.message("You don't have a selection!", null, null, null, null);
+					messenger.message("You don't have a selection!");
 				}
 			} else {
 				Bukkit.getLogger().log(Level.WARNING, "CommandSender can't use Worldedit selection parameter");
@@ -121,19 +111,27 @@ class Messenger {
 	public void reset() {
 		receiver = null;
 	}
-	
+
 	public boolean hasReceiver() {
 		return receiver != null;
+	}
+
+	public void message(String content) {
+		message(content, null, null, null, null);
+	}
+
+	public void message(String content, String hoverText, String command) {
+		message(content, HoverEvent.Action.SHOW_TEXT, hoverText, ClickEvent.Action.RUN_COMMAND, command);
 	}
 
 	public void message(String content, HoverEvent.Action hoverAction, String hoverText, ClickEvent.Action clickAction, String command) {
 		if (receiver instanceof Player) {
 			TextComponent message = new TextComponent(content);
-			if (hoverText != null)
+			if (hoverAction != null && hoverText != null)
 				message.setHoverEvent(
-					new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverText).create()));
-			if (command != null)
-				message.setClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command));
+					new HoverEvent(hoverAction, new ComponentBuilder(hoverText).create()));
+			if (clickAction != null && command != null)
+				message.setClickEvent(new ClickEvent(clickAction, command));
 			receiver.spigot().sendMessage(message);
 			return;
 		}

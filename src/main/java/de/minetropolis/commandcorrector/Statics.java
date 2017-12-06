@@ -18,15 +18,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 
+import de.minetropolis.commandcorrector.NotificationEntry;
+
 public class Statics {
-	
 	static Map<String, List<String>> loadConfig() {
-		System.out.println("THIS IS A DEDICATED VERSION");
 		File jar = null;
 		try {
 			//jar = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -38,8 +39,8 @@ public class Statics {
 
 		if (!config.exists() || config.isDirectory()) {
 			config.getParentFile().mkdirs();
-			new File(config.getParent(),"input").mkdir();
-			new File(config.getParent(),"output").mkdir();
+			new File(config.getParent(), "input").mkdir();
+			new File(config.getParent(), "output").mkdir();
 			try {
 				//Files.copy(getClass().getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
 				Files.copy(Statics.class.getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
@@ -61,8 +62,8 @@ public class Statics {
 	private static Map<String, List<String>> processFile(String string) {
 		Map<String, List<String>> map = new HashMap<>();
 		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?\\\"(.*)\\\"[ \\t]*\\n?\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
-		while(matcher.find()) {
-			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[]{matcher.group(2),matcher.group(3)})));
+		while (matcher.find()) {
+			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[] { matcher.group(2), matcher.group(3) })));
 		}
 		return map;
 	}
@@ -152,7 +153,7 @@ public class Statics {
 		return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
 			.append(location.getBlockZ()).toString();
 	}
-	
+
 	public static String changeCommand(String command, String pattern, String target, String assertion) {
 		//System.out.println(command + " ;; " + pattern + " ;; " + target);
 		//System.out.println(command);
@@ -180,5 +181,32 @@ public class Statics {
 		} while (matcher.find());
 
 		return changed;
+	}
+
+	// TEST public
+	public static Notification notify(String pattern) {
+		Matcher matcher = Pattern.compile(";!\\(([\\w ]*)\\)").matcher(pattern);
+		List<Integer> positions = new ArrayList<>();
+		List<String> messages = new ArrayList<>();
+		int offset = 0;
+
+		while (matcher.find()) {
+			positions.add(matcher.start() - offset);
+			offset += matcher.end() - matcher.start();
+			pattern = pattern.replace(matcher.group(), "");
+			messages.add(matcher.group(1));
+		}
+
+		Notification notification = new Notification(pattern);
+
+		for (int i = 0; i < positions.size(); i++) {
+			String hoverText = new StringBuilder(
+				pattern.substring(Math.max(positions.get(i) - 20, 0), positions.get(i))).append(ChatColor.GOLD)
+					.append(">!<").append(ChatColor.RESET).append(pattern.substring(positions.get(i),
+						Math.min(positions.get(i) + 20, pattern.length())))
+					.toString();
+			notification.add(new NotificationEntry(hoverText, messages.get(i)));
+		}
+		return notification;
 	}
 }

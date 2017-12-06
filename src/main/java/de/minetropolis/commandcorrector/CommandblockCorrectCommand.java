@@ -1,11 +1,15 @@
 package de.minetropolis.commandcorrector;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
@@ -14,8 +18,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
 import de.minetropolis.commandcorrector.Corrections.Correction;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
 
 public class CommandblockCorrectCommand implements CommandExecutor {
 
@@ -63,8 +65,9 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 				args[3] = "";
 			}
 			if (min == null || max == null) {
-				sender.sendMessage("Result would be: " + notify(" LOCAL",
-					Statics.changeCommand(args[0], Statics.interpretPattern(args[1]), args[2], args[3])));
+				Notification notification = Statics.notify(Statics.changeCommand(args[0], Statics.interpretPattern(args[1]), args[2], args[3]));
+				notification.entries.forEach(entry -> plugin.messenger.message("Command notifies: " + entry.message));
+				plugin.messenger.message("result would be:" + notification.command);
 				return true;
 			}
 			changeRules = getChangeRule(Statics.interpretPattern(args[1]), args[2], args[3]);
@@ -125,8 +128,11 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		String changed = command;
 		for (String pattern : changeRules.keySet()) {
 			String unchanged = changed;
-			changed = notify(Statics.locationToString(commandBlock.getLocation()),
-				Statics.changeCommand(changed, pattern, changeRules.get(pattern).get(0), changeRules.get(pattern).get(1)));
+			Notification notification = Statics.notify(Statics.changeCommand(changed, pattern, changeRules.get(pattern).get(0), changeRules.get(pattern).get(1)));
+			notification.entries.forEach(entry -> plugin.messenger.message("CommandBlock at" + Statics.locationToString(commandBlock.getLocation()) + " notifies: " + entry.message,
+				entry.hoverText, "tp @p" + Statics.locationToString(commandBlock.getLocation())));
+
+			changed = notification.command;
 			if (!changed.equals(unchanged))
 				changes.add(pattern);
 		}
@@ -140,40 +146,6 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			plugin.getLogger().log(Level.WARNING, "Couldn't modify commandblock at {0}", commandBlock.getLocation());
 			return Collections.emptySet();
 		}
-	}
-
-	// TEST public
-	public String notify(String location, String pattern) {
-		Matcher matcher = Pattern.compile(";!\\(([\\w ]*)\\)").matcher(pattern);
-		List<Integer> positions = new ArrayList<>();
-		List<String> messages = new ArrayList<>();
-		int offset = 0;
-
-		while (matcher.find()) {
-			positions.add(matcher.start() - offset);
-			offset += matcher.end() - matcher.start();
-			pattern = pattern.replace(matcher.group(), "");
-			messages.add(matcher.group(1));
-		}
-
-		for (int i = 0; i < positions.size(); i++) {
-			String hoverText = new StringBuilder(
-				pattern.substring(Math.max(positions.get(i) - 20, 0), positions.get(i))).append(ChatColor.GOLD)
-					.append(">!<").append(ChatColor.RESET).append(pattern.substring(positions.get(i),
-						Math.min(positions.get(i) + 20, pattern.length())))
-					.toString();
-			if (plugin.messenger.hasReceiver())
-				plugin.messenger.message("CommandBlock at" + location +
-					" notifies: " + messages.get(i),
-					HoverEvent.Action.SHOW_TEXT,
-					hoverText,
-					ClickEvent.Action.RUN_COMMAND,
-					"/tp @p" + location);
-			else
-				System.out.println(location + " notifies: " + messages.get(i) + " --> " + hoverText);
-		}
-
-		return pattern;
 	}
 
 }

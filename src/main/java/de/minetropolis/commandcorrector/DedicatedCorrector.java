@@ -10,7 +10,7 @@ public class DedicatedCorrector {
 	}
 
 	private DedicatedCorrector() {
+		System.out.println("Dedicated Corrector: Loading Config");
 		Map<String, List<String>> map = Statics.loadConfig();
-		System.out.println("test");
 	}
 }

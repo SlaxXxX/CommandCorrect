@@ -55,9 +55,7 @@ public class CommandblockFindCommand implements CommandExecutor {
 				for (Location loc : locations) {
 					plugin.messenger.message(
 							"Found command at:" + Statics.locationToString(loc),
-							HoverEvent.Action.SHOW_TEXT,
 							"Teleport there!",
-							ClickEvent.Action.RUN_COMMAND,
 							"/tp @p" + Statics.locationToString(loc));
 				}
 			} else if (sender instanceof BlockCommandSender) {

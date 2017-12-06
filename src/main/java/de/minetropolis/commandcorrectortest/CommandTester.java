@@ -4,6 +4,8 @@ import java.util.Arrays;
 
 import de.minetropolis.commandcorrector.CommandCorrector;
 import de.minetropolis.commandcorrector.CommandblockCorrectCommand;
+import de.minetropolis.commandcorrector.Notification;
+import de.minetropolis.commandcorrector.NotificationEntry;
 import de.minetropolis.commandcorrector.Statics;
 
 public class CommandTester {
@@ -76,14 +78,16 @@ public class CommandTester {
 	}
 
 	private CommandTester() {
-		CommandblockCorrectCommand cbc = new CommandblockCorrectCommand(null);
 		String result;
 
 		for (int num = 1; num <= 3; num++) {
 			System.out.println("--- RUN" + num + " ---");
 			for (int i = 0; i < commands.length; i++) {
 				for (String[] rule : rules) {
-					result = cbc.notify(" TEST", Statics.changeCommand(commands[i], Statics.interpretPattern(rule[0]), rule[1], rule[2]));
+					Notification notification = Statics.notify(Statics.changeCommand(commands[i], Statics.interpretPattern(rule[0]), rule[1], rule[2]));
+					for (NotificationEntry entry : notification.entries)
+						System.out.println("Command " + i + " notifies: " + entry.message + "; at -> " + entry.hoverText);
+					result = notification.command;
 					if (commands[i] != result)
 						System.out.println(result + "\n");
 					commands[i] = result;

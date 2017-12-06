@@ -50,7 +50,7 @@ public class CommandblockUndoCommand implements CommandExecutor {
 		Correction correction = plugin.corrections.getLast();
 		int undos = 0;
 		if (correction == null) {
-			plugin.messenger.message("Nothing to undo", null, null, null, null);
+			plugin.messenger.message("Nothing to undo");
 			return;
 		}
 
@@ -59,10 +59,9 @@ public class CommandblockUndoCommand implements CommandExecutor {
 			undos += (undoCommandblock(commandData, force)) ? 1 : 0;
 			plugin.messenger.message(
 					"Undid from " + correction.getCorrections().get(commandData) + " to " + commandData.getCommand() +
-							" in CB at:" + Statics.locationToString(commandData.getLocation()),
-					null, null, null, null);
+							" in CB at:" + Statics.locationToString(commandData.getLocation()));
 		}
-		plugin.messenger.message("Undid " + undos + " command changes from" + correction.getCorrections().size() + " Command-Blocks", null, null, null, null);
+		plugin.messenger.message("Undid " + undos + " command changes from" + correction.getCorrections().size() + " Command-Blocks");
 		plugin.corrections.undone();
 	}
 
