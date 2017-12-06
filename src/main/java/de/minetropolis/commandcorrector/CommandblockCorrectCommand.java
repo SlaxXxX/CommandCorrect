@@ -29,15 +29,6 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	public void setDefaultChangeRules(Map<String, List<String>> changes) {
 		this.defaultChangeRules = new HashMap<>(Objects.requireNonNull(changes));
 		defaultChangeRules.remove(null);
-		defaultChangeRules.forEach((pattern, target) -> preventNull(pattern, target));
-	}
-
-	//TODO does list even contain stuff?
-	private void preventNull(String pattern, List<String> target) {
-		if (target.get(0) == null) {
-			defaultChangeRules.put(pattern, Arrays.asList("", ""));
-		}
-
 	}
 
 	@Override
@@ -54,7 +45,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			return true;
 		}
 
-		args = CommandCorrector.process(args);
+		args = Statics.process(args);
 
 		final Map<String, List<String>> changeRules;
 		Location min, max;
@@ -67,32 +58,24 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			break;
 		case 4:
 		case 3:
-			try {
-				if (!args[0].equals("selection"))
-					Math.abs(Integer.parseInt(args[0]));
-			} catch (NumberFormatException | NullPointerException ex) {
-				if (args.length == 3) {
-					args = Arrays.copyOf(args, 4);
-					args[3] = "";
-				}
+			if (args.length == 3) {
+				args = Arrays.copyOf(args, 4);
+				args[3] = "";
+			}
+			if (min == null || max == null) {
 				sender.sendMessage("Result would be: " + notify(" LOCAL",
-						changeCommand(args[0], CommandCorrector.interpretPattern(args[1]), args[2], args[3])));
+					Statics.changeCommand(args[0], Statics.interpretPattern(args[1]), args[2], args[3])));
 				return true;
 			}
-			changeRules = getChangeRule(CommandCorrector.interpretPattern(args[1]), args[2], args[3]);
+			changeRules = getChangeRule(Statics.interpretPattern(args[1]), args[2], args[3]);
 			break;
 		default:
 			return false;
 		}
 
-		if (min == null || max == null)
-			return false;
-
 		ChangeData changes = correctCommandblocks(min, max, changeRules);
-		plugin.getLogger().log(Level.INFO, "{0} has modified {1} commands from {2} of {3} commandblocks!",
-				new Object[] { sender.getName(), changes.getChangeRulesApplied(), changes.getChanged(), changes.getAmount() });
-		sender.sendMessage(changes.getChanged() + " / " + changes.getAmount() + " commandblocks were modified with "
-				+ changes.getChangeRulesApplied() + " modifications.");
+		plugin.getLogger().log(Level.INFO, "{0} has modified {1} commands from {2} of {3} commandblocks!", new Object[] { sender.getName(), changes.getChangeRulesApplied(), changes.getChanged(), changes.getAmount() });
+		sender.sendMessage(changes.getChanged() + " / " + changes.getAmount() + " commandblocks were modified with " + changes.getChangeRulesApplied() + " modifications. Undo with /ccu");
 		return true;
 	}
 
@@ -136,14 +119,14 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	}
 
 	private Set<String> correctCommandblock(CommandBlock commandBlock, Map<String, List<String>> changeRules,
-			Correction correction) {
+		Correction correction) {
 		Set<String> changes = new HashSet<>();
 		String command = commandBlock.getCommand();
 		String changed = command;
 		for (String pattern : changeRules.keySet()) {
 			String unchanged = changed;
-			changed = notify(CommandCorrector.locationToString(commandBlock.getLocation()),
-					changeCommand(changed, pattern, changeRules.get(pattern).get(0), changeRules.get(pattern).get(1)));
+			changed = notify(Statics.locationToString(commandBlock.getLocation()),
+				Statics.changeCommand(changed, pattern, changeRules.get(pattern).get(0), changeRules.get(pattern).get(1)));
 			if (!changed.equals(unchanged))
 				changes.add(pattern);
 		}
@@ -175,51 +158,22 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
 		for (int i = 0; i < positions.size(); i++) {
 			String hoverText = new StringBuilder(
-					pattern.substring(Math.max(positions.get(i) - 20, 0), positions.get(i))).append(ChatColor.GOLD)
-							.append(">!<").append(ChatColor.RESET).append(pattern.substring(positions.get(i),
-									Math.min(positions.get(i) + 20, pattern.length())))
-							.toString();
-			//			plugin.messenger.message("CommandBlock at" + location +
-			//					" notifies: " + messages.get(i),
-			//					HoverEvent.Action.SHOW_TEXT,
-			//					hoverText,
-			//					ClickEvent.Action.RUN_COMMAND,
-			//					"/tp @p" + location);
-			System.out.println("CommandBlock at" + location + " notifies: " + messages.get(i) + " --> " + hoverText);
+				pattern.substring(Math.max(positions.get(i) - 20, 0), positions.get(i))).append(ChatColor.GOLD)
+					.append(">!<").append(ChatColor.RESET).append(pattern.substring(positions.get(i),
+						Math.min(positions.get(i) + 20, pattern.length())))
+					.toString();
+			if (plugin.messenger.hasReceiver())
+				plugin.messenger.message("CommandBlock at" + location +
+					" notifies: " + messages.get(i),
+					HoverEvent.Action.SHOW_TEXT,
+					hoverText,
+					ClickEvent.Action.RUN_COMMAND,
+					"/tp @p" + location);
+			else
+				System.out.println(location + " notifies: " + messages.get(i) + " --> " + hoverText);
 		}
 
 		return pattern;
 	}
 
-	// TEST public
-	public String changeCommand(String command, String pattern, String target, String assertion) {
-		// TEST
-		//plugin.messenger.message((command + " ;; " + pattern + " ;; " + target), null, null, null, null);
-		System.out.println(command + " ;; " + pattern + " ;; " + target);
-		//System.out.println(command);
-
-		if (!assertion.equals("")) {
-			Matcher asserter = Pattern.compile(assertion).matcher(command);
-
-			if (asserter.find()) {
-				//System.out.println("Assertion matched!");
-				return command;
-			}
-		}
-
-		Matcher matcher = Pattern.compile(pattern).matcher(command);
-
-		if (!matcher.find())
-			return command;
-		
-		String changed = command;
-		do {
-			changed = changed.replace(matcher.group(0), target);
-			for (int i = 1; i <= matcher.groupCount(); i++) {
-				changed = changed.replace(";:(" + i + ")", matcher.group(i));
-			}
-		} while (matcher.find());
-
-		return changed;
-	}
 }

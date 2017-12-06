@@ -3,7 +3,6 @@ package de.minetropolis.commandcorrector;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -53,145 +52,13 @@ public class CommandCorrector extends JavaPlugin {
 
 	@Override
 	public void reloadConfig() {
-		correctorCommand.setDefaultChangeRules(loadConfig());
-	}
-
-	public Map<String, List<String>> loadConfig() {
-		File jar = null;
-		try {
-			jar = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
-		} catch (URISyntaxException e1) {
-			e1.printStackTrace();
-		}
-		File config = new File(new File(jar.getParentFile().toURI().getPath(), "TEST").toURI().getPath(), "config.yml");
-
-		if (!config.exists() || config.isDirectory()) {
-			config.getParentFile().mkdirs();
-			try {
-				Files.copy(getClass().getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		try {
-			StringBuilder sb = new StringBuilder();
-			Files.readAllLines(config.toPath()).stream().filter(string -> !string.startsWith("#")).forEach(string -> sb.append(string).append("\n"));
-			return processFile(sb.toString());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		return Collections.emptyMap();
-	}
-
-	private Map<String, List<String>> processFile(String string) {
-		Map<String, List<String>> map = new HashMap<>();
-		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?\\\"(.*)\\\"[ \\t]*\\n?\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
-		while(matcher.find()) {
-			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[]{matcher.group(2),matcher.group(3)})));
-		}
-		return map;
+		correctorCommand.setDefaultChangeRules(Statics.loadConfig());
 	}
 
 	private WorldEditPlugin findWorldEdit() {
 		PluginManager pluginManager = Bukkit.getPluginManager();
 		return (WorldEditPlugin) Arrays.asList(pluginManager.getPlugins()).stream()
 			.filter(plugin -> plugin instanceof WorldEditPlugin).findFirst().orElse(null);
-	}
-
-	static int getRadius(String radius) {
-		try {
-			return Math.abs(Integer.parseInt(radius));
-		} catch (NumberFormatException | NullPointerException ex) {
-			return 10;
-		}
-	}
-
-	static String[] process(String[] args) {
-		ArrayList<String> processed = new ArrayList<>();
-
-		StringBuilder stringBuilder = new StringBuilder();
-		Arrays.asList(args).forEach(arg -> stringBuilder.append(arg).append(" "));
-
-		String commandArgs = stringBuilder.toString().trim();
-
-		String[] splitArgs = commandArgs.split(";/");
-		processed.addAll(Arrays.asList(splitArgs[0].trim().split(" ")));
-		for (int i = 1; i < splitArgs.length; i++)
-			processed.add(splitArgs[i].trim());
-		if (Objects.equals(processed.get(0), ""))
-			processed.remove(0);
-
-		return processed.toArray(new String[0]);
-	}
-
-	// TEST public
-	public static String interpretPattern(String pattern) {
-		List<int[]> groupPositions = findGroupPositions(pattern);
-		if (groupPositions == null) {
-			Bukkit.getLogger().log(Level.WARNING, "\"" + pattern + "\"" + " Has unbalanced brackets!");
-			return pattern;
-		}
-		return escapeAll(pattern, groupPositions);
-	}
-
-	static List<int[]> findGroupPositions(String string) {
-		List<int[]> positions = new ArrayList<>();
-		int i = 0;
-		for (i = string.indexOf(";?(", i); i < string.length(); i = string.indexOf(";?(", i)) {
-			if (i == -1)
-				break;
-			int[] pos = new int[] { i, 0 };
-			int braceCount = 1;
-			for (i = i + 3; i < string.length() && braceCount > 0; i++) {
-				if (string.charAt(i) == '(' && string.charAt(i - 1) != '\\')
-					braceCount++;
-				if (string.charAt(i) == ')' && string.charAt(i - 1) != '\\')
-					braceCount--;
-			}
-			if (braceCount > 0) {
-				return null;
-			}
-			pos[1] = i - 1;
-			positions.add(pos);
-
-		}
-
-		return positions;
-	}
-
-	static String escapeAll(String pattern, List<int[]> positions) {
-		String escapable = "\\/()[]{}?*+.$^|";
-		int group = 0;
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < pattern.length(); i++) {
-			if (!positions.isEmpty() && i >= positions.get(group)[0] && i <= positions.get(group)[1]) {
-				if (i == positions.get(group)[0])
-					i += 2;
-				if (i == positions.get(group)[1] && group < positions.size() - 1)
-					group++;
-			} else if (escapable.contains("" + pattern.charAt(i)))
-				sb.append("\\");
-			sb.append(pattern.charAt(i));
-		}
-		return sb.toString();
-	}
-
-	static Location getLocation(CommandSender sender) {
-		Location location = null;
-		if (sender instanceof Entity) {
-			location = ((Entity) sender).getLocation();
-		} else if (sender instanceof BlockCommandSender) {
-			location = ((BlockCommandSender) sender).getBlock().getLocation();
-		} else {
-			sender.sendMessage("This command is not supported for this sender.");
-		}
-		return location;
-	}
-
-	static String locationToString(Location location) {
-		return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
-			.append(location.getBlockZ()).toString();
 	}
 
 	Location getBound(int scale, String delta, CommandSender sender) {
@@ -206,10 +73,17 @@ public class CommandCorrector extends JavaPlugin {
 				return null;
 			}
 		}
-		Location origin = getLocation(sender);
+		Location origin = Statics.getLocation(sender);
 		if (origin == null)
 			return null;
-		int radius = getRadius(delta);
+
+		int radius;
+		try {
+			radius = Math.abs(Integer.parseInt(delta));
+		} catch (NumberFormatException | NullPointerException ex) {
+			return null;
+		}
+		
 		return new Location(origin.getWorld(), origin.getBlockX() + (radius * scale),
 			origin.getBlockY() + Math.min(Math.max((radius * scale), 0), 255),
 			origin.getBlockZ() + (radius * scale));
@@ -238,7 +112,7 @@ public class CommandCorrector extends JavaPlugin {
 }
 
 class Messenger {
-	private CommandSender receiver;
+	private CommandSender receiver = null;
 
 	public void setReceiver(CommandSender r) {
 		receiver = r;
@@ -246,6 +120,10 @@ class Messenger {
 
 	public void reset() {
 		receiver = null;
+	}
+	
+	public boolean hasReceiver() {
+		return receiver != null;
 	}
 
 	public void message(String content, HoverEvent.Action hoverAction, String hoverText, ClickEvent.Action clickAction, String command) {

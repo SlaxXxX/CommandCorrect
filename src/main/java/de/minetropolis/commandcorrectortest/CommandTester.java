@@ -1,26 +1,10 @@
 package de.minetropolis.commandcorrectortest;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
-import java.security.KeyStore.Entry;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
 
 import de.minetropolis.commandcorrector.CommandCorrector;
 import de.minetropolis.commandcorrector.CommandblockCorrectCommand;
+import de.minetropolis.commandcorrector.Statics;
 
 public class CommandTester {
 	private String[] commands = {
@@ -29,14 +13,14 @@ public class CommandTester {
 		//			"setblock ~1 ~5 ~3 command_block 2 replace",
 		//			"setblock 14 -39 118 minecraft:stone facing=north"
 
-		//		"@a[test1,score_test_min=-1,test2,score_test=3,test3]",
-		//		"@e[score_test=43, test1,score_test_min=2,test2]",
-		//		"@r[test1,score_test=1]",
-		//		"@p[score_test_min=14]",
-		//		"@a[test1,score_test_min=1,test2,score_test=3,test3,scores=[nochntest=3..],test4]",
-		//		"@e[score_test=43, test1,score_test_min=2,scores=[nochntest=1],test2]",
-		//		"@r[test1,test2,score_test=1,scores=[nochntest=3..36]]",
-		//		"@p[score_test_min=14,scores=[nochntest=..6]]",
+		"@a[test1,score_test_min=-1,test2,score_test=3,test3]",
+		"@e[score_test=43, test1,score_test_min=2,test2]",
+		"@r[test1,score_test=1]",
+		"@p[score_test_min=14]",
+		"@a[test1,score_test_min=1,test2,score_test=3,test3,scores=[nochntest=3..],test4]",
+		"@e[score_test=43, test1,score_test_min=2,scores=[nochntest=1],test2]",
+		"@r[test1,test2,score_test=1,scores=[nochntest=3..36]]",
+		"@p[score_test_min=14,scores=[nochntest=..6]]",
 		"@a[test1,score_test_min=-1,test2,score_test=3,test3,score_nochntest=2,test4,score_nochntest_min=1,test5,score_wienochntest=4,test6,score_letztertest_min=-13,score_letztertest=48,test7,score_jetzaberletztertest_min=0,test8,score_jetzaberletztertest=1,test9]"
 
 	};
@@ -99,7 +83,7 @@ public class CommandTester {
 			System.out.println("--- RUN" + num + " ---");
 			for (int i = 0; i < commands.length; i++) {
 				for (String[] rule : rules) {
-					result = cbc.notify(" TEST", cbc.changeCommand(commands[i], CommandCorrector.interpretPattern(rule[0]), rule[1], rule[2]));
+					result = cbc.notify(" TEST", Statics.changeCommand(commands[i], Statics.interpretPattern(rule[0]), rule[1], rule[2]));
 					if (commands[i] != result)
 						System.out.println(result + "\n");
 					commands[i] = result;

@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.minetropolis</groupId>
 	<artifactId>CommandCorrector</artifactId>
-	<version>5.1.2</version>
+	<version>5.1.4</version>
 	<packaging>jar</packaging>
 
 	<name>Command Corrector</name>
@@ -52,6 +52,23 @@
 	</dependencies>
 
 	<build>
+		<plugins>
+			<plugin>
+				<!-- Build an executable JAR -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.0.2</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<addClasspath>true</addClasspath>
+							<classpathPrefix>lib/</classpathPrefix>
+							<mainClass>de.minetropolis.commandcorrector.DedicatedCorrector</mainClass>
+						</manifest>
+					</archive>
+				</configuration>
+			</plugin>
+		</plugins>
 		<defaultGoal>clean install</defaultGoal>
 		<resources>
 			<resource>

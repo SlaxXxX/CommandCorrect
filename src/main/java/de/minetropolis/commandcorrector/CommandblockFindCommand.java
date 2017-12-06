@@ -36,7 +36,7 @@ public class CommandblockFindCommand implements CommandExecutor {
 			return true;
 		}
 
-		args = CommandCorrector.process(args);
+		args = Statics.process(args);
 		if (args == null || args.length != 2)
 			return false;
 
@@ -54,15 +54,15 @@ public class CommandblockFindCommand implements CommandExecutor {
 			if (sender instanceof Player) {
 				for (Location loc : locations) {
 					plugin.messenger.message(
-							"Found command at:" + CommandCorrector.locationToString(loc),
+							"Found command at:" + Statics.locationToString(loc),
 							HoverEvent.Action.SHOW_TEXT,
 							"Teleport there!",
 							ClickEvent.Action.RUN_COMMAND,
-							"/tp @p" + CommandCorrector.locationToString(loc));
+							"/tp @p" + Statics.locationToString(loc));
 				}
 			} else if (sender instanceof BlockCommandSender) {
 				StringBuilder message = new StringBuilder("Found command at:");
-				locations.forEach(loc -> message.append(CommandCorrector.locationToString(loc)).append(" ;"));
+				locations.forEach(loc -> message.append(Statics.locationToString(loc)).append(" ;"));
 			}
 		} else {
 			sender.sendMessage("No command found.");
