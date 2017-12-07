@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.commandcorrectorutil;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -24,11 +25,11 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 
-import de.minetropolis.commandcorrector.NotificationEntry;
+import de.minetropolis.commandcorrectorutil.NotificationEntry;
 
 public class Statics {
 
-	static Map<String, List<String>> loadConfig() {
+	public static Map<String, List<String>> loadConfig() {
 		File jar = null;
 		try {
 			//jar = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -68,7 +69,7 @@ public class Statics {
 		return map;
 	}
 
-	static String[] process(String[] args) {
+	public static String[] process(String[] args) {
 		ArrayList<String> processed = new ArrayList<>();
 
 		StringBuilder stringBuilder = new StringBuilder();
@@ -87,57 +88,81 @@ public class Statics {
 	}
 
 	public static String interpretPattern(String pattern) {
-		List<int[]> groupPositions = findGroupPositions(pattern);
-		if (groupPositions == null) {
+		if (!findGroupPositions(pattern)) {
 			Bukkit.getLogger().log(Level.WARNING, "\"" + pattern + "\"" + " Has unbalanced brackets!");
 			return pattern;
 		}
-		return escapeAll(pattern, groupPositions);
+		return escapeAll(pattern);
 	}
 
-	static List<int[]> findGroupPositions(String string) {
-		List<int[]> positions = new ArrayList<>();
+	public static boolean findGroupPositions(String string) {
+		Groups.groups = new ArrayList<>();
 		int i = 0;
-		for (i = string.indexOf(";?(", i); i < string.length(); i = string.indexOf(";?(", i)) {
-			if (i == -1)
+		int offset = 0;
+		while (i < string.length()) {
+			int group = (string.indexOf(";?(", i) == -1) ? Integer.MAX_VALUE : string.indexOf(";?(", i);
+			int array = (string.indexOf(";>(", i) == -1) ? Integer.MAX_VALUE : string.indexOf(";>(", i);
+			if (Math.min(group, array) == Integer.MAX_VALUE)
 				break;
-			int[] pos = new int[] { i, 0 };
-			int braceCount = 1;
-			for (i = i + 3; i < string.length() && braceCount > 0; i++) {
-				if (string.charAt(i) == '(' && string.charAt(i - 1) != '\\')
-					braceCount++;
-				if (string.charAt(i) == ')' && string.charAt(i - 1) != '\\')
-					braceCount--;
+			i = Math.min(group, array);
+			if (group < array) {
+				boolean capturing = ";?(?:".equals(string.substring(i, i + 4));
+				Group pos = new Group(i, 0, offset, true, capturing);
+				int braceCount = 1;
+				for (i = i + 3; i < string.length() && braceCount > 0; i++) {
+					if (string.charAt(i) == '(' && string.charAt(i - 1) != '\\')
+						braceCount++;
+					if (string.charAt(i) == ')' && string.charAt(i - 1) != '\\')
+						braceCount--;
+				}
+				if (braceCount > 0) {
+					return false;
+				}
+				pos.end = i - 1;
+				Groups.groups.add(pos);
+				offset += 2;
+			} else {
+				Group pos = new Group(i, string.indexOf(")<;", i) + 1, offset, false, true);
+				Groups.groups.add(pos);
+				i = string.indexOf(")<;", i);
+				offset += -2 + StringUtils.countMatches(string.substring(pos.start + 3, pos.end), "(") * 2;
 			}
-			if (braceCount > 0) {
-				return null;
-			}
-			pos[1] = i - 1;
-			positions.add(pos);
-
 		}
-
-		return positions;
+		Groups.groups.forEach(group -> System.out.println("Group " + Groups.groups.indexOf(group) + ": " + group.start + " - " + group.end + " : " + group.group));
+		return true;
 	}
 
-	static String escapeAll(String pattern, List<int[]> positions) {
+	public static String escapeAll(String pattern) {
 		String escapable = "\\/()[]{}?*+.$^|";
-		int group = 0;
 		StringBuilder sb = new StringBuilder();
+		Group group = Groups.groups.get(0);
 		for (int i = 0; i < pattern.length(); i++) {
-			if (!positions.isEmpty() && i >= positions.get(group)[0] && i <= positions.get(group)[1]) {
-				if (i == positions.get(group)[0])
-					i += 2;
-				if (i == positions.get(group)[1] && group < positions.size() - 1)
-					group++;
+			if (!Groups.groups.isEmpty() && i >= group.start && i <= group.end) {
+				if (i == group.start) {
+					i += 1;
+					if (!group.group) {
+						sb.append("(");
+					}
+				} else if (i == group.end) {
+					sb.append(")");
+					if (!group.group)
+						i++;
+					if (Groups.groups.indexOf(group) < Groups.groups.size() - 1)
+						group = Groups.groups.get(Groups.groups.indexOf(group) + 1);
+				} else {
+					sb.append(pattern.charAt(i));
+					if (!group.group && pattern.charAt(i) == '(')
+						sb.append("?:");
+				}
 			} else if (escapable.contains("" + pattern.charAt(i)))
 				sb.append("\\");
-			sb.append(pattern.charAt(i));
+			else
+				sb.append(pattern.charAt(i));
 		}
 		return sb.toString();
 	}
 
-	static Location getLocation(CommandSender sender) {
+	public static Location getLocation(CommandSender sender) {
 		Location location = null;
 		if (sender instanceof Entity) {
 			location = ((Entity) sender).getLocation();
@@ -149,13 +174,13 @@ public class Statics {
 		return location;
 	}
 
-	static String locationToString(Location location) {
+	public static String locationToString(Location location) {
 		return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
 			.append(location.getBlockZ()).toString();
 	}
 
 	public static String changeCommand(String command, String pattern, String target, String assertion) {
-		//System.out.println(command + " ;; " + pattern + " ;; " + target);
+		System.out.println(command + " ;; " + pattern + " ;; " + target);
 		//System.out.println(command);
 
 		if (!assertion.equals("")) {
@@ -173,16 +198,30 @@ public class Statics {
 			return command;
 
 		do {
+			System.out.println("Ayy it matched! " + command);
 			command = command.replace(matcher.group(0), target);
+			Group group = Groups.groups.get(0);
 			for (int i = 1; i <= matcher.groupCount(); i++) {
-				command = command.replace(";:(" + i + ")", matcher.group(i));
+				String string = matcher.group(i);
+				if (!group.group) {
+					String rawGroup = pattern.substring(group.start - group.offset, group.end - group.offset + 1);
+					Matcher groupMatcher = Pattern.compile("\\(\\?:" + string + "\\||\\|" + string + "\\||\\|" + string + "\\)").matcher(rawGroup);
+					groupMatcher.find();
+					rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());
+					groupMatcher.reset();
+					groupMatcher = Pattern.compile("\\|(\\w*?)\\)").matcher(rawGroup);
+					groupMatcher.find();
+					string = groupMatcher.group(1);
+				}
+				command = command.replace(";:(" + i + ")", string);
+				if (i < matcher.groupCount())
+					group = group.next();
 			}
 		} while (matcher.find());
-		
+
 		return command;
 	}
 
-	// TEST public
 	public static Notification notify(String pattern) {
 		Matcher matcher = Pattern.compile(";!\\(([\\w ]*)\\)").matcher(pattern);
 		List<Integer> positions = new ArrayList<>();

@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import de.minetropolis.commandcorrectorutil.Notification;
+import de.minetropolis.commandcorrectorutil.Statics;
+
 public class DedicatedCorrector {
 
 	public static void main(String[] args) {

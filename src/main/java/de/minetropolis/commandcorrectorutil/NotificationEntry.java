@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.commandcorrectorutil;
 
 public class NotificationEntry {
 	public String colorText;

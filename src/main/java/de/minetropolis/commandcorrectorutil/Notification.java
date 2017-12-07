@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.commandcorrectorutil;
 
 import java.util.ArrayList;
 import java.util.List;

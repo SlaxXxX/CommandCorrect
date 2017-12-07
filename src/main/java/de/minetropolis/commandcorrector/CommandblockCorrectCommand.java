@@ -17,7 +17,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import de.minetropolis.commandcorrector.Corrections.Correction;
+import de.minetropolis.commandcorrectorutil.ChangeData;
+import de.minetropolis.commandcorrectorutil.Notification;
+import de.minetropolis.commandcorrectorutil.Statics;
+import de.minetropolis.commandcorrectorutil.Corrections.Correction;
 
 public class CommandblockCorrectCommand implements CommandExecutor {
 

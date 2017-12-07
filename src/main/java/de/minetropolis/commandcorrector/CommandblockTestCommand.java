@@ -3,6 +3,10 @@ package de.minetropolis.commandcorrector;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+
+import de.minetropolis.commandcorrectorutil.Notification;
+import de.minetropolis.commandcorrectorutil.Statics;
+
 import java.util.*;
 
 public class CommandblockTestCommand implements CommandExecutor {

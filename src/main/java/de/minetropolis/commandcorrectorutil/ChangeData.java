@@ -1,15 +1,15 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.commandcorrectorutil;
 
 import java.util.Collections;
 import java.util.Map;
 
-final class ChangeData {
+public final class ChangeData {
 
 	private final int amount;
 	private final int blocksChanged;
 	private final Map<String, Integer> changes;
 	
-	ChangeData(int amount, int changed, Map<String, Integer> changes) {
+	public ChangeData(int amount, int changed, Map<String, Integer> changes) {
 		this.amount = amount;
 		this.blocksChanged = changed;
 		this.changes = changes;
