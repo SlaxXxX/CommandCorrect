@@ -33,7 +33,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
 	public void setDefaultChangeRules(Map<String, List<String>> changes) {
 		this.defaultChangeRules = new TreeMap<>(Objects.requireNonNull(changes));
-		defaultChangeRules.remove(null);
+		//defaultChangeRules.remove(null);
 	}
 
 	@Override

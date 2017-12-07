@@ -135,7 +135,9 @@ public class Statics {
 	public static String escapeAll(String pattern) {
 		String escapable = "\\/()[]{}?*+.$^|";
 		StringBuilder sb = new StringBuilder();
-		Group group = Groups.groups.get(0);
+		Group group = null;
+		if (!Groups.groups.isEmpty())
+			group = Groups.groups.get(0);
 		for (int i = 0; i < pattern.length(); i++) {
 			if (!Groups.groups.isEmpty() && i >= group.start && i <= group.end) {
 				if (i == group.start) {
@@ -200,10 +202,12 @@ public class Statics {
 		do {
 			System.out.println("Ayy it matched! " + command);
 			command = command.replace(matcher.group(0), target);
-			Group group = Groups.groups.get(0);
+			Group group = null;
+			if (!Groups.groups.isEmpty())
+				group = Groups.groups.get(0);
 			for (int i = 1; i <= matcher.groupCount(); i++) {
 				String string = matcher.group(i);
-				if (!group.group) {
+				if (group != null && !group.group) {
 					String rawGroup = pattern.substring(group.start - group.offset, group.end - group.offset + 1);
 					Matcher groupMatcher = Pattern.compile("\\(\\?:" + string + "\\||\\|" + string + "\\||\\|" + string + "\\)").matcher(rawGroup);
 					groupMatcher.find();
@@ -214,7 +218,7 @@ public class Statics {
 					string = groupMatcher.group(1);
 				}
 				command = command.replace(";:(" + i + ")", string);
-				if (i < matcher.groupCount())
+				if (group != null && i < matcher.groupCount())
 					group = group.next();
 			}
 		} while (matcher.find());
