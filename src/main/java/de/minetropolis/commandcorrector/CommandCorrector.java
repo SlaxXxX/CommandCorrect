@@ -22,6 +22,7 @@ public class CommandCorrector extends JavaPlugin {
 
 	private CommandblockCorrectCommand correctorCommand;
 	private CommandblockFindCommand findCommand;
+	private CommandblockTestCommand testCommand;
 	private CommandblockUndoCommand undoCommand;
 	Corrections corrections = new Corrections();
 	Messenger messenger = new Messenger();
@@ -31,11 +32,13 @@ public class CommandCorrector extends JavaPlugin {
 	public void onEnable() {
 		worldedit = findWorldEdit();
 		correctorCommand = new CommandblockCorrectCommand(this);
-		undoCommand = new CommandblockUndoCommand(this);
 		findCommand = new CommandblockFindCommand(this);
+		testCommand = new CommandblockTestCommand(this);
+		undoCommand = new CommandblockUndoCommand(this);
 		reloadConfig();
 		getCommand("commandblockcorrect").setExecutor(correctorCommand);
 		getCommand("commandblockcorrectfind").setExecutor(findCommand);
+		getCommand("commandblockcorrecttest").setExecutor(testCommand);
 		getCommand("commandblockcorrectundo").setExecutor(undoCommand);
 		getCommand("commandblockcorrectorconfigreload").setExecutor(new ReloadConfigCommand(this));
 	}

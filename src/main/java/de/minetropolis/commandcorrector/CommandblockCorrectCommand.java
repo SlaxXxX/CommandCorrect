@@ -2,12 +2,12 @@ package de.minetropolis.commandcorrector;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.logging.Level;
 
 import org.bukkit.Location;
@@ -29,7 +29,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	}
 
 	public void setDefaultChangeRules(Map<String, List<String>> changes) {
-		this.defaultChangeRules = new HashMap<>(Objects.requireNonNull(changes));
+		this.defaultChangeRules = new TreeMap<>(Objects.requireNonNull(changes));
 		defaultChangeRules.remove(null);
 	}
 
@@ -47,7 +47,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			return true;
 		}
 		
-		if(args.length == 0)
+		if(args == null || args.length == 0)
 			return false;
 
 		args = Statics.process(args);
@@ -82,7 +82,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
 	private Map<String, List<String>> getChangeRule(String pattern, String target, String assertion) {
 		if (pattern != null && target != null && assertion != null && !pattern.isEmpty()) {
-			Map<String, List<String>> changeRule = new HashMap<>();
+			Map<String, List<String>> changeRule = new TreeMap<>();
 			changeRule.put(pattern, Arrays.asList(target, assertion));
 			return changeRule;
 		} else {
@@ -93,7 +93,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	private ChangeData correctCommandblocks(Location min, Location max, Map<String, List<String>> changeRules) {
 		int blocksFound = 0;
 		int blocksChanged = 0;
-		Map<String, Integer> changes = new HashMap<>();
+		Map<String, Integer> changes = new TreeMap<>();
 		Correction correction = plugin.corrections.makeNew();
 
 		for (int x = min.getBlockX(); x <= max.getBlockX(); x++) {

@@ -1,17 +1,8 @@
 package de.minetropolis.commandcorrector;
 
-import org.bukkit.Location;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.CommandBlock;
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.HoverEvent;
-
 import java.util.*;
 
 public class CommandblockTestCommand implements CommandExecutor {
