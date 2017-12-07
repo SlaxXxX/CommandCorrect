@@ -9,7 +9,7 @@ website: "${project.url}"
 commands:
   commandblockcorrect:
     description: 'Corrects command-blocks.'
-    usage: /<command> <radius | "selection" | command> [<pattern> <target> <assertion>]
+    usage: /<command> <radius | "selection"> [<pattern> <target> <assertion>]
     permission: commandcorrect.apply
     aliases: [commandcorrect, cc, cbc]
   commandblockcorrectorconfigreload:
@@ -22,6 +22,11 @@ commands:
     usage: /<command> <radius | "selection"> <pattern>
     permission: commandcorrect.find
     aliases: [commandcorrectfind, ccf, cbcf]
+  commandblockcorrecttest:
+    description: 'Tests your pattern without changing commands.'
+    usage: /<command> <input> <pattern> <target> [<assertion>]
+    permission: commandcorrect.test
+    aliases: [commandcorrecttest, cct, cbct]
   commandblockcorrectundo:
     description: 'Undo last correction.'
     usage: /<command> [<"force">]

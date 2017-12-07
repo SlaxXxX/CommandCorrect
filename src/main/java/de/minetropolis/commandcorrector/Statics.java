@@ -9,10 +9,10 @@ import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,6 +27,7 @@ import org.bukkit.entity.Entity;
 import de.minetropolis.commandcorrector.NotificationEntry;
 
 public class Statics {
+
 	static Map<String, List<String>> loadConfig() {
 		File jar = null;
 		try {
@@ -39,8 +40,7 @@ public class Statics {
 
 		if (!config.exists() || config.isDirectory()) {
 			config.getParentFile().mkdirs();
-			new File(config.getParent(), "input").mkdir();
-			new File(config.getParent(), "output").mkdir();
+			new File(config.getParent(), "Dedicated").mkdir();
 			try {
 				//Files.copy(getClass().getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
 				Files.copy(Statics.class.getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
@@ -60,7 +60,7 @@ public class Statics {
 	}
 
 	private static Map<String, List<String>> processFile(String string) {
-		Map<String, List<String>> map = new HashMap<>();
+		Map<String, List<String>> map = new TreeMap<>();
 		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?\\\"(.*)\\\"[ \\t]*\\n?\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
 		while (matcher.find()) {
 			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[] { matcher.group(2), matcher.group(3) })));
@@ -162,7 +162,7 @@ public class Statics {
 			Matcher asserter = Pattern.compile(assertion).matcher(command);
 
 			if (asserter.find()) {
-				//System.out.println("Assertion matched!");
+				System.out.println("Assertion matched!");
 				return command;
 			}
 		}
@@ -172,15 +172,14 @@ public class Statics {
 		if (!matcher.find())
 			return command;
 
-		String changed = command;
 		do {
-			changed = changed.replace(matcher.group(0), target);
+			command = command.replace(matcher.group(0), target);
 			for (int i = 1; i <= matcher.groupCount(); i++) {
-				changed = changed.replace(";:(" + i + ")", matcher.group(i));
+				command = command.replace(";:(" + i + ")", matcher.group(i));
 			}
 		} while (matcher.find());
-
-		return changed;
+		
+		return command;
 	}
 
 	// TEST public
@@ -200,12 +199,17 @@ public class Statics {
 		Notification notification = new Notification(pattern);
 
 		for (int i = 0; i < positions.size(); i++) {
-			String hoverText = new StringBuilder(
+			String colorText = new StringBuilder(
 				pattern.substring(Math.max(positions.get(i) - 20, 0), positions.get(i))).append(ChatColor.GOLD)
 					.append(">!<").append(ChatColor.RESET).append(pattern.substring(positions.get(i),
 						Math.min(positions.get(i) + 20, pattern.length())))
 					.toString();
-			notification.add(new NotificationEntry(hoverText, messages.get(i)));
+			String normalText = new StringBuilder(
+				pattern.substring(Math.max(positions.get(i) - 20, 0), positions.get(i)))
+					.append(">!<").append(pattern.substring(positions.get(i),
+						Math.min(positions.get(i) + 20, pattern.length())))
+					.toString();
+			notification.add(new NotificationEntry(colorText, normalText, messages.get(i)));
 		}
 		return notification;
 	}

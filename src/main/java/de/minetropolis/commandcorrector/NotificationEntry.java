@@ -1,11 +1,13 @@
 package de.minetropolis.commandcorrector;
 
 public class NotificationEntry {
-	public String hoverText;
+	public String colorText;
+	public String normalText;
 	public String message;
 
-	public NotificationEntry(String hover, String msg) {
-		hoverText = hover;
+	public NotificationEntry(String color, String normal, String msg) {
+		colorText = color;
+		normalText = normal;
 		message = msg;
 	}
 }

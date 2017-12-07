@@ -46,6 +46,9 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			sender.sendMessage("You don't have the required Permissions!");
 			return true;
 		}
+		
+		if(args.length == 0)
+			return false;
 
 		args = Statics.process(args);
 
@@ -53,23 +56,18 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		Location min, max;
 		min = plugin.getBound(-1, args[0], sender);
 		max = plugin.getBound(1, args[0], sender);
+		
+		if (min == null || max == null)
+			return false;
 
 		switch (args.length) {
 		case 1:
 			changeRules = getChangeRule(null, null, null);
 			break;
-		case 4:
 		case 3:
-			if (args.length == 3) {
-				args = Arrays.copyOf(args, 4);
-				args[3] = "";
-			}
-			if (min == null || max == null) {
-				Notification notification = Statics.notify(Statics.changeCommand(args[0], Statics.interpretPattern(args[1]), args[2], args[3]));
-				notification.entries.forEach(entry -> plugin.messenger.message("Command notifies: " + entry.message));
-				plugin.messenger.message("result would be:" + notification.command);
-				return true;
-			}
+			args = Arrays.copyOf(args, 4);
+			args[3] = "";
+		case 4:
 			changeRules = getChangeRule(Statics.interpretPattern(args[1]), args[2], args[3]);
 			break;
 		default:
@@ -130,7 +128,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			String unchanged = changed;
 			Notification notification = Statics.notify(Statics.changeCommand(changed, pattern, changeRules.get(pattern).get(0), changeRules.get(pattern).get(1)));
 			notification.entries.forEach(entry -> plugin.messenger.message("CommandBlock at" + Statics.locationToString(commandBlock.getLocation()) + " notifies: " + entry.message,
-				entry.hoverText, "tp @p" + Statics.locationToString(commandBlock.getLocation())));
+				entry.colorText, "tp @p" + Statics.locationToString(commandBlock.getLocation())));
 
 			changed = notification.command;
 			if (!changed.equals(unchanged))
