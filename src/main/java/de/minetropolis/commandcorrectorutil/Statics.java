@@ -32,7 +32,6 @@ public class Statics {
 	public static Map<String, List<String>> loadConfig() {
 		File jar = null;
 		try {
-			//jar = new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI());
 			jar = new File(Statics.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
@@ -43,7 +42,6 @@ public class Statics {
 			config.getParentFile().mkdirs();
 			new File(config.getParent(), "Dedicated").mkdir();
 			try {
-				//Files.copy(getClass().getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
 				Files.copy(Statics.class.getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -145,8 +143,8 @@ public class Statics {
 				i = string.indexOf(")<;", i);
 			}
 		}
-		Groups.groups.forEach(group -> System.out.println("Group " + Groups.groups.indexOf(group) + ": " + group.start + "~" + group.startOffset + " - " + group.end + "~" + group.endOffset + " : " + group.group));
-		System.out.println(string);
+		//Groups.groups.forEach(group -> System.out.println("Group " + Groups.groups.indexOf(group) + ": " + group.start + "~" + group.startOffset + " - " + group.end + "~" + group.endOffset + " : " + group.group));
+		//System.out.println(string);
 		return true;
 	}
 
@@ -198,7 +196,7 @@ public class Statics {
 	}
 
 	public static String changeCommand(String command, String pattern, String target, String assertion) {
-		System.out.println(command + " || " + pattern + " || " + target);
+		//System.out.println(command + " || " + pattern + " || " + target);
 		//System.out.println(command);
 
 		if (!assertion.equals("")) {
@@ -216,7 +214,7 @@ public class Statics {
 			return command;
 
 		do {
-			System.out.println("Ayy it matched! " + command);
+			//System.out.println("Ayy it matched! " + command);
 			command = command.replaceFirst(escape(matcher.group(0)), target);
 			Group group = null;
 			if (!Groups.groups.isEmpty())
@@ -229,7 +227,7 @@ public class Statics {
 					groupMatcher.find();
 					rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());
 					groupMatcher.reset();
-					groupMatcher = Pattern.compile("\\|(\\w*?)\\)").matcher(rawGroup);
+					groupMatcher = Pattern.compile("\\|([\\w ]*?)\\)").matcher(rawGroup);
 					groupMatcher.find();
 					string = groupMatcher.group(1);
 				}
