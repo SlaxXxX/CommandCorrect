@@ -107,7 +107,7 @@ public class Statics {
 			i = Math.min(group, array);
 			if (group < array) {
 				boolean capturing = ";?(?:".equals(string.substring(i, i + 4));
-				Group pos = new Group(i, 0, offset, true, capturing);
+				Group pos = new Group(i, 0, offset, offset -= 2, true, capturing);
 				int braceCount = 1;
 				for (i = i + 3; i < string.length() && braceCount > 0; i++) {
 					if (string.charAt(i) == '(' && string.charAt(i - 1) != '\\')
@@ -118,17 +118,18 @@ public class Statics {
 				if (braceCount > 0) {
 					return false;
 				}
-				pos.end = i - 1;
+				pos.end = i;
 				Groups.groups.add(pos);
-				offset += 2;
 			} else {
-				Group pos = new Group(i, string.indexOf(")<;", i) + 1, offset, false, true);
+				Group pos = new Group(i, string.indexOf(")<;", i) + 1,
+					offset, offset += -2 + StringUtils.countMatches(string.substring(i + 2, string.indexOf(")<;", i)), "(") * 2,
+					false, true);
 				Groups.groups.add(pos);
 				i = string.indexOf(")<;", i);
-				offset += -2 + StringUtils.countMatches(string.substring(pos.start + 3, pos.end), "(") * 2;
 			}
 		}
-		Groups.groups.forEach(group -> System.out.println("Group " + Groups.groups.indexOf(group) + ": " + group.start + " - " + group.end + " : " + group.group));
+		Groups.groups.forEach(group -> System.out.println("Group " + Groups.groups.indexOf(group) + ": " + group.start + "~" + group.startOffset + " - " + group.end + "~" + group.endOffset + " : " + group.group));
+		System.out.println(string);
 		return true;
 	}
 
@@ -139,27 +140,43 @@ public class Statics {
 		if (!Groups.groups.isEmpty())
 			group = Groups.groups.get(0);
 		for (int i = 0; i < pattern.length(); i++) {
-			if (!Groups.groups.isEmpty() && i >= group.start && i <= group.end) {
+			if (!Groups.groups.isEmpty() && i >= group.start && i <= group.end - 1) {
 				if (i == group.start) {
-					i += 1;
+					i += 2;
 					if (!group.group) {
 						sb.append("(");
 					}
-				} else if (i == group.end) {
-					sb.append(")");
-					if (!group.group)
-						i++;
-					if (Groups.groups.indexOf(group) < Groups.groups.size() - 1)
-						group = Groups.groups.get(Groups.groups.indexOf(group) + 1);
-				} else {
+				}
+				if (i < pattern.length()) {
 					sb.append(pattern.charAt(i));
 					if (!group.group && pattern.charAt(i) == '(')
 						sb.append("?:");
 				}
-			} else if (escapable.contains("" + pattern.charAt(i)))
+				if (i == group.end - 1) {
+					if (!group.group) {
+						i += 2;
+						sb.append(")");
+					}
+					if (Groups.groups.indexOf(group) < Groups.groups.size() - 1)
+						group = Groups.groups.get(Groups.groups.indexOf(group) + 1);
+				}
+			} else {
+					String escaped = escape("" + pattern.charAt(i));
+					if (escaped.length() > 1)
+						group.addOffset(escaped.length() - 1, i);
+					sb.append(escaped);
+			}
+		}
+		return sb.toString();
+	}
+
+	private static String escape(String string) {
+		String escapable = "\\/()[]{}?*+.$^|";
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < string.length(); i++) {
+			if (escapable.contains("" + string.charAt(i)))
 				sb.append("\\");
-			else
-				sb.append(pattern.charAt(i));
+			sb.append(string.charAt(i));
 		}
 		return sb.toString();
 	}
@@ -201,14 +218,14 @@ public class Statics {
 
 		do {
 			System.out.println("Ayy it matched! " + command);
-			command = command.replace(matcher.group(0), target);
+			command = command.replaceFirst(escape(matcher.group(0)), target);
 			Group group = null;
 			if (!Groups.groups.isEmpty())
 				group = Groups.groups.get(0);
 			for (int i = 1; i <= matcher.groupCount(); i++) {
 				String string = matcher.group(i);
 				if (group != null && !group.group) {
-					String rawGroup = pattern.substring(group.start - group.offset, group.end - group.offset + 1);
+					String rawGroup = pattern.substring(group.start + group.startOffset, group.end + group.endOffset + 1);
 					Matcher groupMatcher = Pattern.compile("\\(\\?:" + string + "\\||\\|" + string + "\\||\\|" + string + "\\)").matcher(rawGroup);
 					groupMatcher.find();
 					rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());
