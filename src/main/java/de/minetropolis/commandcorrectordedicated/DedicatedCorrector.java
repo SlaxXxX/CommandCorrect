@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.commandcorrectordedicated;
 
 import java.io.File;
 import java.io.FileWriter;

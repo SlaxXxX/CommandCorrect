@@ -33,13 +33,12 @@ NOTE: the '$' before the pattern makes sure, that noone unknowingly replaces all
 
 Here is a real Example:
 
-";?([\\], ]);>(g|gamemode)<;;?(?: *)=;?(?: *);>(0|s|survival)|(1|c|creative)|(2|a|adventure)(3|sp|spectator)<;;?([\\[, ])":
-	";:(1);:(2)=;:(3);:(4)"
-|	""
+# ";?([\\[, ]{1});>(g|gamemode)<;;?(?: *)=;?(?: *);>(0|s|survival)|(1|c|creative)|(2|a|adventure)|(3|sp|spectator)<;;?([\\], ]{1})":
+#	";:(1);:(2)=;:(3);:(4)"
+#|	""
 
-g=1
-g=c
-gamemode=creative
+it replaces every g=1 or g=s or gamemode=3 or g=spectator through the now in 1.13 valid syntax gamemode=fulldescription
+
 
 invalid is for example:
 

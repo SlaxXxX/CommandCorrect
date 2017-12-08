@@ -68,6 +68,23 @@ public class Statics {
 		}
 		return map;
 	}
+	
+	public static Location getLocation(CommandSender sender) {
+		Location location = null;
+		if (sender instanceof Entity) {
+			location = ((Entity) sender).getLocation();
+		} else if (sender instanceof BlockCommandSender) {
+			location = ((BlockCommandSender) sender).getBlock().getLocation();
+		} else {
+			sender.sendMessage("This command is not supported for this sender.");
+		}
+		return location;
+	}
+
+	public static String locationToString(Location location) {
+		return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
+			.append(location.getBlockZ()).toString();
+	}
 
 	public static String[] process(String[] args) {
 		ArrayList<String> processed = new ArrayList<>();
@@ -134,7 +151,6 @@ public class Statics {
 	}
 
 	public static String escapeAll(String pattern) {
-		String escapable = "\\/()[]{}?*+.$^|";
 		StringBuilder sb = new StringBuilder();
 		Group group = null;
 		if (!Groups.groups.isEmpty())
@@ -181,25 +197,8 @@ public class Statics {
 		return sb.toString();
 	}
 
-	public static Location getLocation(CommandSender sender) {
-		Location location = null;
-		if (sender instanceof Entity) {
-			location = ((Entity) sender).getLocation();
-		} else if (sender instanceof BlockCommandSender) {
-			location = ((BlockCommandSender) sender).getBlock().getLocation();
-		} else {
-			sender.sendMessage("This command is not supported for this sender.");
-		}
-		return location;
-	}
-
-	public static String locationToString(Location location) {
-		return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
-			.append(location.getBlockZ()).toString();
-	}
-
 	public static String changeCommand(String command, String pattern, String target, String assertion) {
-		System.out.println(command + " ;; " + pattern + " ;; " + target);
+		System.out.println(command + " || " + pattern + " || " + target);
 		//System.out.println(command);
 
 		if (!assertion.equals("")) {

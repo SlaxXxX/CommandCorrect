@@ -26,6 +26,8 @@ class Group {
 	}
 	
 	public Group next() {
+		if (Groups.groups.indexOf(this) >= Groups.groups.size() - 1)
+			return this;
 		Group nextGroup = Groups.groups.get(Groups.groups.indexOf(this) + 1);
 		if (nextGroup.capturing)
 			return nextGroup;

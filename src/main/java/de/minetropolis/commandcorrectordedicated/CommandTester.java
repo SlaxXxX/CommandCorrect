@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrectortest;
+package de.minetropolis.commandcorrectordedicated;
 
 import java.util.Arrays;
 
@@ -77,8 +77,8 @@ public class CommandTester {
 		//			"(score_\\w+_min=-?\\d+)"
 		//		}
 		{
-			";>(g|gamemode)<;;?(?: *)=;?(?: *);>(1|creative|c|creative)|(2|adventure|a|adventure)|(3|spectator|sp|spectator)|(0|survival|s|survival)<;",
-			";:(1)=;:(2)",
+			";?([\\[,]{1});?(?: *);>(g|gamemode)<;;?(?: *)=;?(?: *);>(0|s|survival)|(1|c|creative)|(2|a|adventure)|(3|sp|spectator)<;;?(?: *);?([\\],]{1})",
+			";:(1);:(2)=;:(3);:(4)",
 			""
 		}
 	};
