@@ -17,6 +17,7 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sun.media.jfxmedia.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -50,6 +51,7 @@ public class Statics {
 		try {
 			StringBuilder sb = new StringBuilder();
 			Files.readAllLines(config.toPath()).stream().filter(string -> !string.startsWith("#")).forEach(string -> sb.append(string).append("\n"));
+			System.out.println(sb.toString());
 			return processFile(sb.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -60,9 +62,9 @@ public class Statics {
 
 	private static Map<String, List<String>> processFile(String string) {
 		Map<String, List<String>> map = new TreeMap<>();
-		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?\\\"(.*)\\\"[ \\t]*\\n?\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
+		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
 		while (matcher.find()) {
-			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(new String[] { matcher.group(2), matcher.group(3) })));
+			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(matcher.group(2), matcher.group(3))));
 		}
 		return map;
 	}

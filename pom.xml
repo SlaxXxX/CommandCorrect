@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.minetropolis</groupId>
 	<artifactId>CommandCorrector</artifactId>
-	<version>6.0.3</version>
+	<version>6.0.4</version>
 	<packaging>jar</packaging>
 
 	<name>Command Corrector</name>
@@ -63,7 +63,7 @@
 						<manifest>
 							<addClasspath>true</addClasspath>
 							<classpathPrefix>lib/</classpathPrefix>
-							<mainClass>de.minetropolis.commandcorrector.DedicatedCorrector</mainClass>
+							<mainClass>de.minetropolis.commandcorrectordedicated.DedicatedCorrector</mainClass>
 						</manifest>
 					</archive>
 				</configuration>

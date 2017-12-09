@@ -26,11 +26,11 @@ public class DedicatedCorrector {
 	private DedicatedCorrector() throws Exception {
 		System.out.println("Dedicated Corrector: Loading Config");
 		Map<String, List<String>> map = Statics.loadConfig();
-		File folder = null;
-		folder = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().toURI().getPath(), "CommandCorrector");
+		map.entrySet().forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue().get(0) + " | " + entry.getValue().get(1)));
+		File folder = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().toURI().getPath(), "CommandCorrector");
 		File[] content = new File(folder.toURI().getPath(), "Dedicated").listFiles();
 		if (content.length == 0) {
-			System.out.println("Dedicated Corrector: Input does not contain any files");
+			System.out.println("Dedicated Corrector: \"CommandCorrector\\Dedicated\" folder does not contain any files");
 			return;
 		}
 		for (File file : content) {

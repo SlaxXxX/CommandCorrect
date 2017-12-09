@@ -80,7 +80,7 @@ public class CommandCorrector extends JavaPlugin {
 		}
 
 		return new Location(origin.getWorld(), origin.getBlockX() + (radius * scale),
-			origin.getBlockY() + Math.min(Math.max((radius * scale), 0), 255),
+			 Math.min(Math.max((origin.getBlockY() + radius * scale), 0), 255),
 			origin.getBlockZ() + (radius * scale));
 	}
 
