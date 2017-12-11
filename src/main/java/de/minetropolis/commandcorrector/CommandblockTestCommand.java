@@ -4,6 +4,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import de.minetropolis.commandcorrectorutil.InterpretedPattern;
 import de.minetropolis.commandcorrectorutil.Notification;
 import de.minetropolis.commandcorrectorutil.Statics;
 
@@ -39,7 +40,8 @@ public class CommandblockTestCommand implements CommandExecutor {
 			args = Arrays.copyOf(args, 4);
 			args[3] = "";
 		case 4:
-			Notification notification = Statics.notify(Statics.changeCommand(args[0], Statics.interpretPattern(args[1]), args[2], args[3]));
+			InterpretedPattern ip = Statics.interpretPattern(args[1]).fill(args[2], args[3]);
+			Notification notification = Statics.notify(Statics.changeCommand(ip, args[0]));
 			notification.entries.forEach(entry -> plugin.messenger.message("command notifies: " + entry.message + ", at: " + entry.colorText));
 			plugin.messenger.message("Result would be: " + notification.command);
 			break;

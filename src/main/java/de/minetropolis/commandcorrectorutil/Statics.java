@@ -10,14 +10,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sun.media.jfxmedia.logging.Logger;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -30,7 +27,7 @@ import de.minetropolis.commandcorrectorutil.NotificationEntry;
 
 public class Statics {
 
-	public static Map<String, List<String>> loadConfig() {
+	public static List<InterpretedPattern> loadConfig() {
 		File jar = null;
 		try {
 			jar = new File(Statics.class.getProtectionDomain().getCodeSource().getLocation().toURI());
@@ -50,25 +47,25 @@ public class Statics {
 		}
 		try {
 			StringBuilder sb = new StringBuilder();
-			Files.readAllLines(config.toPath()).stream().filter(string -> !string.startsWith("#")).forEach(string -> sb.append(string).append("\n"));
+			Files.readAllLines(config.toPath()).forEach(string -> sb.append(string).append("\n"));
 			System.out.println(sb.toString());
 			return processFile(sb.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		return Collections.emptyMap();
+		return Collections.emptyList();
 	}
 
-	private static Map<String, List<String>> processFile(String string) {
-		Map<String, List<String>> map = new TreeMap<>();
+	private static List<InterpretedPattern> processFile(String string) {
+		List<InterpretedPattern> list = new ArrayList<>();
 		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
 		while (matcher.find()) {
-			map.put(matcher.group(1), new ArrayList<>(Arrays.asList(matcher.group(2), matcher.group(3))));
+			list.add(interpretPattern(matcher.group(1)).fill(matcher.group(2), matcher.group(3)));
 		}
-		return map;
+		return list;
 	}
-	
+
 	public static Location getLocation(CommandSender sender) {
 		Location location = null;
 		if (sender instanceof Entity) {
@@ -104,16 +101,17 @@ public class Statics {
 		return processed.toArray(new String[0]);
 	}
 
-	public static String interpretPattern(String pattern) {
-		if (!findGroupPositions(pattern)) {
+	public static InterpretedPattern interpretPattern(String pattern) {
+		InterpretedPattern ip = findGroupPositions(pattern);
+		if (ip == null) {
 			Bukkit.getLogger().log(Level.WARNING, "\"" + pattern + "\"" + " Has unbalanced brackets!");
-			return pattern;
+			return new InterpretedPattern(pattern);
 		}
-		return escapeAll(pattern);
+		return escapeAll(ip);
 	}
 
-	public static boolean findGroupPositions(String string) {
-		Groups.groups = new ArrayList<>();
+	public static InterpretedPattern findGroupPositions(String string) {
+		InterpretedPattern ip = new InterpretedPattern(string);
 		int i = 0;
 		int offset = 0;
 		while (i < string.length()) {
@@ -124,7 +122,7 @@ public class Statics {
 			i = Math.min(group, array);
 			if (group < array) {
 				boolean capturing = ";?(?:".equals(string.substring(i, i + 4));
-				Group pos = new Group(i, 0, offset, offset -= 2, true, capturing);
+				Group pos = new Group(ip, i, 0, offset, offset -= 2, true, capturing);
 				int braceCount = 1;
 				for (i = i + 3; i < string.length() && braceCount > 0; i++) {
 					if (string.charAt(i) == '(' && string.charAt(i - 1) != '\\')
@@ -133,39 +131,39 @@ public class Statics {
 						braceCount--;
 				}
 				if (braceCount > 0) {
-					return false;
+					return null;
 				}
 				pos.end = i;
-				Groups.groups.add(pos);
+				ip.groups.add(pos);
 			} else {
-				Group pos = new Group(i, string.indexOf(")<;", i) + 1,
+				Group pos = new Group(ip, i, string.indexOf(")<;", i) + 1,
 					offset, offset += -2 + StringUtils.countMatches(string.substring(i + 2, string.indexOf(")<;", i)), "(") * 2,
 					false, true);
-				Groups.groups.add(pos);
+				ip.groups.add(pos);
 				i = string.indexOf(")<;", i);
 			}
 		}
 		//Groups.groups.forEach(group -> System.out.println("Group " + Groups.groups.indexOf(group) + ": " + group.start + "~" + group.startOffset + " - " + group.end + "~" + group.endOffset + " : " + group.group));
 		//System.out.println(string);
-		return true;
+		return ip;
 	}
 
-	public static String escapeAll(String pattern) {
+	public static InterpretedPattern escapeAll(InterpretedPattern ip) {
 		StringBuilder sb = new StringBuilder();
 		Group group = null;
-		if (!Groups.groups.isEmpty())
-			group = Groups.groups.get(0);
-		for (int i = 0; i < pattern.length(); i++) {
-			if (!Groups.groups.isEmpty() && i >= group.start && i <= group.end - 1) {
+		if (!ip.groups.isEmpty())
+			group = ip.groups.get(0);
+		for (int i = 0; i < ip.pattern.length(); i++) {
+			if (!ip.groups.isEmpty() && i >= group.start && i <= group.end - 1) {
 				if (i == group.start) {
 					i += 2;
 					if (!group.group) {
 						sb.append("(");
 					}
 				}
-				if (i < pattern.length()) {
-					sb.append(pattern.charAt(i));
-					if (!group.group && pattern.charAt(i) == '(')
+				if (i < ip.pattern.length()) {
+					sb.append(ip.pattern.charAt(i));
+					if (!group.group && ip.pattern.charAt(i) == '(')
 						sb.append("?:");
 				}
 				if (i == group.end - 1) {
@@ -173,17 +171,18 @@ public class Statics {
 						i += 2;
 						sb.append(")");
 					}
-					if (Groups.groups.indexOf(group) < Groups.groups.size() - 1)
-						group = Groups.groups.get(Groups.groups.indexOf(group) + 1);
+					if (ip.groups.indexOf(group) < ip.groups.size() - 1)
+						group = ip.groups.get(ip.groups.indexOf(group) + 1);
 				}
 			} else {
-					String escaped = escape("" + pattern.charAt(i));
-					if (escaped.length() > 1)
-						group.addOffset(escaped.length() - 1, i);
-					sb.append(escaped);
+				String escaped = escape("" + ip.pattern.charAt(i));
+				if (escaped.length() > 1)
+					group.addOffset(escaped.length() - 1, i);
+				sb.append(escaped);
 			}
 		}
-		return sb.toString();
+		ip.pattern = sb.toString();
+		return ip;
 	}
 
 	private static String escape(String string) {
@@ -197,12 +196,12 @@ public class Statics {
 		return sb.toString();
 	}
 
-	public static String changeCommand(String command, String pattern, String target, String assertion) {
+	public static String changeCommand(InterpretedPattern ip, String command) {
 		//System.out.println(command + " || " + pattern + " || " + target);
 		//System.out.println(command);
 
-		if (!assertion.equals("")) {
-			Matcher asserter = Pattern.compile(assertion).matcher(command);
+		if (!ip.assertion.equals("")) {
+			Matcher asserter = Pattern.compile(ip.assertion).matcher(command);
 
 			if (asserter.find()) {
 				System.out.println("Assertion matched!");
@@ -210,21 +209,21 @@ public class Statics {
 			}
 		}
 
-		Matcher matcher = Pattern.compile(pattern).matcher(command);
+		Matcher matcher = Pattern.compile(ip.pattern).matcher(command);
 
 		if (!matcher.find())
 			return command;
 
 		do {
 			//System.out.println("Ayy it matched! " + command);
-			command = command.replaceFirst(escape(matcher.group(0)), target);
+			command = command.replaceFirst(escape(matcher.group(0)), ip.target);
 			Group group = null;
-			if (!Groups.groups.isEmpty())
-				group = Groups.groups.get(0);
+			if (!ip.groups.isEmpty())
+				group = ip.groups.get(0);
 			for (int i = 1; i <= matcher.groupCount(); i++) {
 				String string = matcher.group(i);
 				if (group != null && !group.group) {
-					String rawGroup = pattern.substring(group.start + group.startOffset, group.end + group.endOffset + 1);
+					String rawGroup = ip.pattern.substring(group.start + group.startOffset, group.end + group.endOffset + 1);
 					Matcher groupMatcher = Pattern.compile("\\(\\?:" + string + "\\||\\|" + string + "\\||\\|" + string + "\\)").matcher(rawGroup);
 					groupMatcher.find();
 					rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());

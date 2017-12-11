@@ -7,9 +7,8 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 
+import de.minetropolis.commandcorrectorutil.InterpretedPattern;
 import de.minetropolis.commandcorrectorutil.Notification;
 import de.minetropolis.commandcorrectorutil.Statics;
 
@@ -25,8 +24,8 @@ public class DedicatedCorrector {
 
 	private DedicatedCorrector() throws Exception {
 		System.out.println("Dedicated Corrector: Loading Config");
-		Map<String, List<String>> map = Statics.loadConfig();
-		map.entrySet().forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue().get(0) + " | " + entry.getValue().get(1)));
+		List<InterpretedPattern> list = Statics.loadConfig();
+		list.forEach(ip -> System.out.println(ip.pattern + ": " + ip.target + " | " + ip.assertion));
 		File folder = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().toURI().getPath(), "CommandCorrector");
 		File[] content = new File(folder.toURI().getPath(), "Dedicated").listFiles();
 		if (content.length == 0) {
@@ -48,8 +47,8 @@ public class DedicatedCorrector {
 
 				for (String line : lines) {
 					String newline = line;
-					for (Entry<String, List<String>> entry : map.entrySet()) {
-						Notification notification = Statics.notify(Statics.changeCommand(newline, Statics.interpretPattern(entry.getKey()), entry.getValue().get(0), entry.getValue().get(1)));
+					for (InterpretedPattern ip : list) {
+						Notification notification = Statics.notify(Statics.changeCommand(ip, newline));
 						notification.entries.forEach(notif -> System.out.println("Line " + lines.indexOf(line) + " notifies: " + notif.message + ", at: " + notif.normalText));
 						newline = notification.command;
 					}

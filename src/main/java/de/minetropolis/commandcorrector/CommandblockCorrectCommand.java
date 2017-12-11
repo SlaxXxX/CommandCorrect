@@ -1,5 +1,6 @@
 package de.minetropolis.commandcorrector;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,18 +22,19 @@ import de.minetropolis.commandcorrectorutil.ChangeData;
 import de.minetropolis.commandcorrectorutil.Notification;
 import de.minetropolis.commandcorrectorutil.Statics;
 import de.minetropolis.commandcorrectorutil.Corrections.Correction;
+import de.minetropolis.commandcorrectorutil.InterpretedPattern;
 
 public class CommandblockCorrectCommand implements CommandExecutor {
 
     private final CommandCorrector plugin;
-    private Map<String, List<String>> defaultChangeRules = Collections.emptyMap();
+    private List<InterpretedPattern> defaultChangeRules = Collections.emptyList();
 
     public CommandblockCorrectCommand(CommandCorrector plugin) {
         this.plugin = plugin;
     }
 
-    public void setDefaultChangeRules(Map<String, List<String>> changes) {
-        this.defaultChangeRules = new TreeMap<>(Objects.requireNonNull(changes));
+    public void setDefaultChangeRules(List<InterpretedPattern> changes) {
+        this.defaultChangeRules = new ArrayList<>(Objects.requireNonNull(changes));
     }
 
     @Override
@@ -54,7 +56,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
         args = Statics.process(args);
 
-        final Map<String, List<String>> changeRules;
+        final List<InterpretedPattern> changeRules;
         Location min, max;
         min = plugin.getBound(-1, args[0], sender);
         max = plugin.getBound(1, args[0], sender);
@@ -84,17 +86,17 @@ public class CommandblockCorrectCommand implements CommandExecutor {
         return true;
     }
 
-    private Map<String, List<String>> getChangeRule(String pattern, String target, String assertion) {
+    private List<InterpretedPattern> getChangeRule(String pattern, String target, String assertion) {
         if (pattern != null && target != null && assertion != null && !pattern.isEmpty()) {
-            Map<String, List<String>> changeRule = new TreeMap<>();
-            changeRule.put(Statics.interpretPattern(pattern), Arrays.asList(target, assertion));
+            List<InterpretedPattern> changeRule = new ArrayList<>();
+            changeRule.add(Statics.interpretPattern(pattern).fill(target, assertion));
             return changeRule;
         } else {
-            return Collections.unmodifiableMap(defaultChangeRules);
+            return Collections.unmodifiableList(defaultChangeRules);
         }
     }
 
-    private ChangeData correctCommandblocks(Location min, Location max, Map<String, List<String>> changeRules) {
+    private ChangeData correctCommandblocks(Location min, Location max, List<InterpretedPattern> changeRules) {
         int blocksFound = 0;
         int blocksChanged = 0;
         Map<String, Integer> changes = new TreeMap<>();
@@ -124,24 +126,24 @@ public class CommandblockCorrectCommand implements CommandExecutor {
         return new ChangeData(blocksFound, blocksChanged, changes);
     }
 
-    private Set<String> correctCommandblock(CommandBlock commandBlock, Map<String, List<String>> changeRules,
+    private Set<String> correctCommandblock(CommandBlock commandBlock, List<InterpretedPattern> changeRules,
                                             Correction correction) {
         Set<String> changes = new HashSet<>();
         String command = commandBlock.getCommand();
         String changed = command;
-        for (String pattern : changeRules.keySet()) {
+        for (InterpretedPattern ip : changeRules) {
             String unchanged = changed;
             plugin.messenger.message("BEFORE: unchanged: " + unchanged + "; changed: " + changed);
-            Notification notification = Statics.notify(Statics.changeCommand(changed, pattern, changeRules.get(pattern).get(0), changeRules.get(pattern).get(1)));
+            Notification notification = Statics.notify(Statics.changeCommand(ip, changed));
             notification.entries.forEach(entry -> plugin.messenger.message("CommandBlock at" + Statics.locationToString(commandBlock.getLocation()) + " notifies: " + entry.message,
                     entry.colorText, "tp @p" + Statics.locationToString(commandBlock.getLocation())));
 
             changed = notification.command;
 
-            plugin.messenger.message("DOING: " + pattern + "; Target: " + changeRules.get(pattern).get(0) + "; Assertion:" + changeRules.get(pattern).get(1));
+            plugin.messenger.message("DOING: " + ip.pattern + "; Target: " + ip.target + "; Assertion:" + ip.assertion);
             plugin.messenger.message("AFTER: unchanged: " + unchanged + "; changed: " + changed);
             if (!changed.equals(unchanged))
-                changes.add(pattern);
+                changes.add(ip.pattern);
         }
         if (!changed.equals(command)) {
             commandBlock.setCommand(changed);

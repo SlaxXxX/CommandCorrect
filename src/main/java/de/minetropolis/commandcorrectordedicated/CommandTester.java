@@ -2,6 +2,7 @@ package de.minetropolis.commandcorrectordedicated;
 
 import java.util.Arrays;
 
+import de.minetropolis.commandcorrectorutil.InterpretedPattern;
 import de.minetropolis.commandcorrectorutil.Notification;
 import de.minetropolis.commandcorrectorutil.NotificationEntry;
 import de.minetropolis.commandcorrectorutil.Statics;
@@ -94,7 +95,8 @@ public class CommandTester {
 			System.out.println("--- RUN" + num + " ---");
 			for (int i = 0; i < commands.length; i++) {
 				for (String[] rule : rules) {
-					Notification notification = Statics.notify(Statics.changeCommand(commands[i], Statics.interpretPattern(rule[0]), rule[1], rule[2]));
+					InterpretedPattern ip = Statics.interpretPattern(rule[0]).fill(rule[1], rule[2]);
+					Notification notification = Statics.notify(Statics.changeCommand(ip, commands[i]));
 					for (NotificationEntry entry : notification.entries)
 						System.out.println("Command " + i + " notifies: " + entry.message + "; at -> " + entry.normalText);
 					result = notification.command;
