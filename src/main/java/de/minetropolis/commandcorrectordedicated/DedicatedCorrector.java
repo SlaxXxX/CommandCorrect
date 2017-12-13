@@ -5,6 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,13 +26,16 @@ public class DedicatedCorrector {
 	private DedicatedCorrector() throws Exception {
 		System.out.println("Dedicated Corrector: Loading Config");
 		List<InterpretedPattern> list = Statics.loadConfig();
-		list.forEach(ip -> System.out.println(ip.pattern + ": " + ip.target + " | " + ip.assertion));
+		System.out.println("Dedicated Corrector: Found " + list.size() + " ChangeRules");
 		File folder = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().toURI().getPath(), "CommandCorrector");
 		File[] content = new File(folder.toURI().getPath(), "Dedicated").listFiles();
 		if (content.length == 0) {
 			System.out.println("Dedicated Corrector: \"CommandCorrector\\Dedicated\" folder does not contain any files");
 			return;
 		}
+		System.out.print("Dedicated Corrector: Found " + content.length + " Files: ");
+		Arrays.asList(content).forEach(file -> System.out.print(file.getName() + " ,"));
+		System.out.println("\n");
 		for (File file : content) {
 			System.out.println("Dedicated Corrector: Correcting " + file.getName());
 			List<String> fillLines = new ArrayList<>();

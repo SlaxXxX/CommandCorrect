@@ -48,7 +48,6 @@ public class Statics {
 		try {
 			StringBuilder sb = new StringBuilder();
 			Files.readAllLines(config.toPath()).forEach(string -> sb.append(string).append("\n"));
-			System.out.println(sb.toString());
 			return processFile(sb.toString());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -204,7 +203,6 @@ public class Statics {
 			Matcher asserter = Pattern.compile(ip.assertion).matcher(command);
 
 			if (asserter.find()) {
-				System.out.println("Assertion matched!");
 				return command;
 			}
 		}
@@ -215,7 +213,6 @@ public class Statics {
 			return command;
 
 		do {
-			//System.out.println("Ayy it matched! " + command);
 			command = command.replaceFirst(escape(matcher.group(0)), ip.target);
 			Group group = null;
 			if (!ip.groups.isEmpty())
