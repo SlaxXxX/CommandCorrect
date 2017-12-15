@@ -61,8 +61,6 @@ public class CommandblockCorrectCommand implements CommandExecutor {
         min = plugin.getBound(-1, args[0], sender);
         max = plugin.getBound(1, args[0], sender);
 
-        plugin.messenger.message("Min: " + Statics.locationToString(min) + "\nMax: " + Statics.locationToString(max));
-
         if (min == null || max == null)
             return false;
 
@@ -109,7 +107,6 @@ public class CommandblockCorrectCommand implements CommandExecutor {
                     Location blockLocation = new Location(min.getWorld(), x, y, z);
                     BlockState commandBlock = blockLocation.getBlock().getState();
                     if (commandBlock instanceof CommandBlock) {
-                        plugin.messenger.message("Found Block at: " + Statics.locationToString(commandBlock.getLocation()));
                         blocksFound++;
                         Set<String> blockChanges = correctCommandblock((CommandBlock) commandBlock, changeRules, correction);
                         if (!blockChanges.isEmpty()) {
@@ -133,15 +130,12 @@ public class CommandblockCorrectCommand implements CommandExecutor {
         String changed = command;
         for (InterpretedPattern ip : changeRules) {
             String unchanged = changed;
-            plugin.messenger.message("BEFORE: unchanged: " + unchanged + "; changed: " + changed);
             Notification notification = Statics.notify(Statics.changeCommand(ip, changed));
             notification.entries.forEach(entry -> plugin.messenger.message("CommandBlock at" + Statics.locationToString(commandBlock.getLocation()) + " notifies: " + entry.message,
-                    entry.colorText, "tp @p" + Statics.locationToString(commandBlock.getLocation())));
+                    entry.colorText, "/tp @p" + Statics.locationToString(commandBlock.getLocation())));
 
             changed = notification.command;
 
-            plugin.messenger.message("DOING: " + ip.pattern + "; Target: " + ip.target + "; Assertion:" + ip.assertion);
-            plugin.messenger.message("AFTER: unchanged: " + unchanged + "; changed: " + changed);
             if (!changed.equals(unchanged))
                 changes.add(ip.pattern);
         }
@@ -149,7 +143,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
             commandBlock.setCommand(changed);
         }
         if (commandBlock.update(true, false)) {
-            correction.add(commandBlock.getLocation(), "", command, changed);
+            correction.add(commandBlock.getLocation(), plugin.getCBDataString(commandBlock), command, changed);
             return Collections.unmodifiableSet(changes);
         } else {
             plugin.messenger.message("Couldn't modify commandblock at:" + Statics.locationToString(commandBlock.getLocation()), null, "tp @p" + Statics.locationToString(commandBlock.getLocation()));

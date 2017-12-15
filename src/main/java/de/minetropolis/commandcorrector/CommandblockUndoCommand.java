@@ -57,10 +57,13 @@ public class CommandblockUndoCommand implements CommandExecutor {
 
 
         for (CommandData commandData : correction.getCorrections().keySet()) {
-            undos += (undoCommandblock(commandData, force)) ? 1 : 0;
-            plugin.messenger.message(
-                    "Undid from " + correction.getCorrections().get(commandData) + " to " + commandData.getCommand() +
-                            " in CB at:" + Statics.locationToString(commandData.getLocation()), "Teleport there", "tp @p" + Statics.locationToString(commandData.getLocation()));
+            boolean success = undoCommandblock(commandData, force);
+            if (success) {
+                undos++;
+                plugin.messenger.message(
+                        "Undid from " + correction.getCorrections().get(commandData) + " to " + commandData.getCommand() +
+                                " in CB at:" + Statics.locationToString(commandData.getLocation()), "Teleport there", "/tp @p" + Statics.locationToString(commandData.getLocation()));
+            }
         }
         plugin.messenger.message("Undid " + undos + " command changes from " + correction.getCorrections().size() + " Command-Blocks");
         plugin.corrections.undone();
@@ -79,6 +82,9 @@ public class CommandblockUndoCommand implements CommandExecutor {
             commandBlock.setCommand(commandData.getCommand());
             commandBlock.update(true, false);
             return true;
+        } else {
+            plugin.messenger.message(
+                    "Commandblock at:" + Statics.locationToString(commandData.getLocation()) + " could not be undone.", "Teleport there", "/tp @p" + Statics.locationToString(commandData.getLocation()));
         }
         return false;
     }
