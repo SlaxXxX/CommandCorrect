@@ -175,7 +175,7 @@ public class Statics {
 				}
 			} else {
 				String escaped = escape("" + ip.pattern.charAt(i));
-				if (escaped.length() > 1)
+				if (group != null && escaped.length() > 1)
 					group.addOffset(escaped.length() - 1, i);
 				sb.append(escaped);
 			}
@@ -209,14 +209,12 @@ public class Statics {
 
 		Matcher matcher = Pattern.compile(ip.pattern).matcher(command);
 
-		if (!matcher.find())
-			return command;
-
-		do {
+		while (matcher.find()) {
 			command = command.replaceFirst(escape(matcher.group(0)), ip.target);
 			Group group = null;
 			if (!ip.groups.isEmpty())
 				group = ip.groups.get(0);
+
 			for (int i = 1; i <= matcher.groupCount(); i++) {
 				String string = matcher.group(i);
 				if (group != null && !group.group) {
@@ -233,7 +231,24 @@ public class Statics {
 				if (group != null && i < matcher.groupCount())
 					group = group.next();
 			}
-		} while (matcher.find());
+
+			for (int i = 1; i <= matcher.groupCount(); i++) {
+				Matcher outputGroup = Pattern.compile(";\\:\\((.+?)\\)(?:\\:(!?)\\((.+?)\\))\\:;").matcher(command);
+				while (outputGroup.find()) {
+					Matcher groupIndex = Pattern.compile("\\%(\\d+)").matcher(outputGroup.group(1));
+					if (groupIndex.find()) {
+						int index = Integer.parseInt(groupIndex.group(1));
+						if (matcher.groupCount() >= index) {
+							command = command.replace(outputGroup.group(), "");
+							if (matcher.group(index).equals(outputGroup.group(3)) ^ outputGroup.group(2).equals("!")) {
+								command = command.substring(0, outputGroup.start()) + outputGroup.group(1) + command.substring(outputGroup.start(), command.length());
+								command = command.replaceFirst("%" + index, matcher.group(index));
+							}
+						}
+					}
+				}
+			}
+		}
 
 		return command;
 	}

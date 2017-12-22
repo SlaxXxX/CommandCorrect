@@ -11,6 +11,8 @@ import org.bukkit.Location;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.material.Command;
+import org.bukkit.material.Directional;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -35,9 +37,9 @@ public class CommandCorrector extends JavaPlugin {
     WorldEditPlugin worldedit;
 
     public static Map<String, String> abrvSwitch = new HashMap<String, String>() {{
-        put("b", "command_block");
-        put("c", "chained_command_block");
-        put("r", "repeating_command_block");
+        put("b", "command");
+        put("c", "command_chain");
+        put("r", "command_repeating");
         put("u", "up");
         put("d", "down");
         put("n", "north");
@@ -134,9 +136,9 @@ public class CommandCorrector extends JavaPlugin {
     }
 
     public String getCBDataString(CommandBlock commandBlock) {
-        messenger.message(commandBlock.getClass().toString());
         messenger.message(commandBlock.getType().name());
-        messenger.message(commandBlock.getData().toString());
+        commandBlock.getMetadata("auto").forEach(value -> messenger.message(value.asString()));
+        commandBlock.getMetadata("").forEach(value -> messenger.message(value.asString()));
         return "";
     }
 }
