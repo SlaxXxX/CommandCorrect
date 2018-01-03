@@ -136,9 +136,9 @@ public class CommandCorrector extends JavaPlugin {
     }
 
     public String getCBDataString(CommandBlock commandBlock) {
-        messenger.message(commandBlock.getType().name());
-        commandBlock.getMetadata("auto").forEach(value -> messenger.message(value.asString()));
-        commandBlock.getMetadata("").forEach(value -> messenger.message(value.asString()));
+        //messenger.message(commandBlock.getType().name());
+        //commandBlock.getMetadata("auto").forEach(value -> messenger.message(value.asString()));
+        //commandBlock.getMetadata("").forEach(value -> messenger.message(value.asString()));
         return "";
     }
 }
