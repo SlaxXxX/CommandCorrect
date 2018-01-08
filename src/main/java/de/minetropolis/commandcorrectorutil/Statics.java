@@ -209,8 +209,10 @@ public class Statics {
 
         Matcher matcher = Pattern.compile(ip.pattern).matcher(command);
 
+        int offset = 0;
         while (matcher.find()) {
-            command = command.replaceFirst(escape(matcher.group(0)), Matcher.quoteReplacement(ip.target));
+            command = command.substring(0, matcher.start() + offset) + ip.target + command.substring(matcher.group().length() + matcher.start() + offset);
+            offset += ip.target.length() - matcher.group().length();
             Group group = null;
             if (!ip.groups.isEmpty())
                 group = ip.groups.get(0);

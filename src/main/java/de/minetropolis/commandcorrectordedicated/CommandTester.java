@@ -31,9 +31,7 @@ public class CommandTester {
             //"@s[gamemode=sp]",
             //"@r[gamemode=creative]"
 
-            "A\\n",
-            "\\nTest",
-            "\\nLol"
+            "this is\\na test\\nwhich is quite\\nlong"
 
     };
     private String[][] rules = {
@@ -86,9 +84,10 @@ public class CommandTester {
             //	";:(1);:(2)=;:(3);:(4)",
             //	""
             //}
+
             {
                     "\\n",
-                    "\\\\\\\\n",
+                    "\\\\n",
                     ""
             }
     };
