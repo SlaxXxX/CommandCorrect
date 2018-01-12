@@ -18,7 +18,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import de.minetropolis.commandcorrectorutil.ChangeData;
 import de.minetropolis.commandcorrectorutil.Notification;
 import de.minetropolis.commandcorrectorutil.Statics;
 import de.minetropolis.commandcorrectorutil.Corrections.Correction;
@@ -78,9 +77,6 @@ public class CommandblockCorrectCommand implements CommandExecutor {
                 return false;
         }
 
-        ChangeData changes = correctCommandblocks(min, max, changeRules);
-        plugin.getLogger().log(Level.INFO, "{0} has modified {1} commands from {2} of {3} commandblocks!", new Object[]{sender.getName(), changes.getChangeRulesApplied(), changes.getChanged(), changes.getAmount()});
-        sender.sendMessage(changes.getChanged() + " / " + changes.getAmount() + " commandblocks were modified with " + changes.getChangeRulesApplied() + " modifications. Undo with /ccu");
         return true;
     }
 
@@ -94,7 +90,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
         }
     }
 
-    private ChangeData correctCommandblocks(Location min, Location max, List<InterpretedPattern> changeRules) {
+    private void correctCommandblocks(Location min, Location max, List<InterpretedPattern> changeRules) {
         int blocksFound = 0;
         int blocksChanged = 0;
         Map<String, Integer> changes = new TreeMap<>();
@@ -120,7 +116,9 @@ public class CommandblockCorrectCommand implements CommandExecutor {
                 }
             }
         }
-        return new ChangeData(blocksFound, blocksChanged, changes);
+        plugin.getLogger().log(Level.INFO, "{0} has modified {1} commands from {2} of {3} commandblocks!",
+        	new Object[]{plugin.messenger.getReceiver().getName(), correction.getCorrections().size(), blocksChanged, blocksFound});
+        plugin.messenger.message(blocksChanged + " / " + blocksFound + " commandblocks were modified with " + correction.getCorrections().size() + " modifications. Undo with /ccu");
     }
 
     private Set<String> correctCommandblock(CommandBlock commandBlock, List<InterpretedPattern> changeRules,

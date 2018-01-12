@@ -149,6 +149,10 @@ class Messenger {
     public void setReceiver(CommandSender r) {
         receiver = r;
     }
+    
+    public CommandSender getReceiver() {
+        return receiver;
+    }
 
     public void reset() {
         receiver = null;
