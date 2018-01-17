@@ -361,3 +361,17 @@ Obviously this isn't some voodoo from imaginationland, but a very real issue i'm
 The solution is this:
 ";>(g|gamemode)<;=;>(0|s|survival)|(1|c|creative)|(2|a|adventure)|(3|sp|spectator)<;"
 
+To understand what it does, let's take the left one: ";>(g|gamemode)<;".
+";><;" again defines the start and end of this special function.
+For the inside, we have a regex-like syntax.
+In that way, it just matches "g" or "gamemode" and puts the result into the capturing group.
+In this case, it's almost the same, it matches any of these arguments, but if successful,
+puts the last (right) argument into the capturing group.
+This is useful, if you have many abbreviations / symbols / synonyms, but you want / need it to be in a single way.
+As seen for example "survival" meant in this context the same as "s" or "0", but in 1.13 it is the only accepted keyword.
+This sadly doesn't work with the input or pattern containing any regex interpreted special characters ( \/()[]{}?*+.$^| ), i may look into this at some point
+
+
+But that's it! You can now call yourself an expert in using the CommandCorrector.
+Have fun with it ;)
+If you experience any bugs, open up an issue on the github page https://github.com/SlaxXxX/CommandCorrect/issues

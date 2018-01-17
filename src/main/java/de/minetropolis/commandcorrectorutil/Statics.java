@@ -218,14 +218,14 @@ public class Statics {
 				group = ip.groups.get(0);
 
 			for (int i = 1; i <= matcher.groupCount(); i++) {
-				String string = matcher.group(i);
+				String string = escape(matcher.group(i));
 				if (group != null && !group.group) {
 					String rawGroup = ip.pattern.substring(group.start + group.startOffset, group.end + group.endOffset + 1);
 					Matcher groupMatcher = Pattern.compile("\\(\\?:" + string + "\\||\\|" + string + "\\||\\|" + string + "\\)").matcher(rawGroup);
 					groupMatcher.find();
 					rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());
 					groupMatcher.reset();
-					groupMatcher = Pattern.compile("\\|([\\w ]*?)\\)").matcher(rawGroup);
+					groupMatcher = Pattern.compile("\\|([^\\|]*?)\\)").matcher(rawGroup);
 					groupMatcher.find();
 					string = groupMatcher.group(1);
 				}
@@ -234,7 +234,7 @@ public class Statics {
 					group = group.next();
 			}
 
-			Matcher outputGroup = Pattern.compile(";\\:(\\d+)\\((.+?)\\)(?:\\:(!?)\\((.+?)\\))\\:;").matcher(command);
+			Matcher outputGroup = Pattern.compile(";:(\\d+)\\((.+?)\\)(?::(!?)\\((.+?)\\)):;").matcher(command);
 			int replaceOffset = 0;
 			while (outputGroup.find()) {
 				int index = Integer.parseInt(outputGroup.group(1));

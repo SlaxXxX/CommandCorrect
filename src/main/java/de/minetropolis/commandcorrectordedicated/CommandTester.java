@@ -24,15 +24,15 @@ public class CommandTester {
             //		"@p[score_test_min=14,scores=[nochntest=..6]]",
             //		"@a[test1,score_test_min=-1,test2,score_test=3,test3,score_nochntest=2,test4,score_nochntest_min=1,test5,score_wienochntest=4,test6,score_letztertest_min=-13,score_letztertest=48,test7,score_jetzaberletztertest_min=0,test8,score_jetzaberletztertest=1,test9]"
 
-            //"@a[g=1]",
-            //"@a[g=s]",
-            //"@p[g=spectator]",
-            //"@r[gamemode=2]",
-            //"@s[gamemode=sp]",
-            //"@r[gamemode=creative]"
+            "@a[g=1]",
+            "@a[g=s]",
+            "@p[g=spectator]",
+            "@r[gamemode=2]",
+            "@s[gamemode=sp]",
+            "@r[gamemode=creative]"
 
-            "This is a test",
-            "This is a fail"
+//            "This is a test",
+//            "This is a fail"
 
     };
     private String[][] rules = {
@@ -80,17 +80,22 @@ public class CommandTester {
             //			"@;:(1)[;:(2);:(5);:(6),;:(3)=;:(4)..];:(7)]",
             //			"(score_\\w+_min=-?\\d+)"
             //		}
-            //{
-            //	";?([\\[,]{1});?(?: *);>(g|gamemode)<;;?(?: *)=;?(?: *);>(0|s|survival)|(1|c|creative)|(2|a|adventure)|(3|sp|spectator)<;;?(?: *);?([\\],]{1})",
-            //	";:(1);:(2)=;:(3);:(4)",
-            //	""
-            //}
+//            {
+//            	";?([\\[,]{1});?(?: *);>(g|gamemode)<;;?(?: *)=;?(?: *);>(0|s|survival)|(1|c|creative)|(2|a|adventure)|(3|sp|spectator)<;;?(?: *);?([\\],]{1})",
+//            	";:(1);:(2)=;:(3);:(4)",
+//            	""
+//            }
+		{
+			";>(\\[g=1\\]|\\[gamemode=creative\\])<;",
+			";:(1)",
+			""
+		}
 
-            {
-                    "This is a ;?(.*)",
-                    "This is ;:1(a ;:(1)):(test):;;:1(no test):!(test):;",
-                    ""
-            }
+//            {
+//                    "This is a ;?(.*)",
+//                    "This is ;:1(a ;:(1)):(test):;;:1(no test):!(test):;",
+//                    ""
+//            }
     };
 
     public static void main(String[] args) {
