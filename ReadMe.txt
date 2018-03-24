@@ -1,4 +1,9 @@
-# --=CommandCorrect=--
+--=CommandCorrect=--
+
+First of first of first of all!!:
+There is a much nicer - beautifully formatted version of this readme on my github page
+https://github.com/SlaxXxX/CommandCorrect/wiki/Readme---Nicely-formatted
+So please do yourself a favor and read it over there
 
 CommandCorrect is a Minecraft plugin / Standalone Jar for mass text formatting.
 It is used by specifying rules for the corrector to find and replace text.
@@ -13,7 +18,7 @@ executing the /cc command or the Jar may apply unwanted irreversible changes
 (even though the plugin version has an undo function),
 so BACKUP YOUR WORLDS AND FILES
 
-##CommandCorrect in Minecraft
+COMMANDCORRECTOR IN MINECRAFT
 
 That said let's start with this guide to a world of looking forward to command changes in future Minecraft versions!
 
@@ -33,17 +38,17 @@ Glad you asked, totally not scripted question-asking-question-asker!
 After you've put this plugin into the plugins folder of your server,
 you can start the server up, and head ingame.
 This plugin offers 5 commands:
-```
+
 /commandblockcorrectorconfigreload
 /commandblockcorrect
 /commandblockcorrectfind
 /commandblockcorrecttest
 /commandblockcorrectundo
-```
+
 Obviously no one wants to write these long ass names so all of them have abbreviations!
 
-Let's start with `/commandblockcorrectorconfigreload`:
-Short: `/ccr`
+Let's start with "/commandblockcorrectorconfigreload":
+Short: "/ccr"
 
 WHAT CONFIG?
 
@@ -56,8 +61,8 @@ In there you can define as many corrections as you want.
 To see how you format the config, look at the default config that is generated,
 but please wait with that until you're done with this tutorial.
 
-First, let's figure out the syntax for `/commandblockcorrect`:
-Short: `/cc`
+First, let's figure out the syntax for "/commandblockcorrect":
+Short: "/cc"
 
 First argument of /cc is the space you want the commandblocks to be corrected.
 For that, you can either use a radius, originating from your position,
@@ -69,25 +74,25 @@ Once executed, all commands in the defined area will be corrected
 with the defined corrections from your config file.
 
 For spontaneous changes, you can also define a correction within the command.
-Syntax for that is `/cc radius pattern target assertion`.
+Syntax for that is "/cc radius pattern target assertion".
 
 ...WHAT?
 
 Yes, i thought so..
 Let's explain this piece by piece.
-`/cc radius` is the same as before.
-After that comes `pattern` and `target`.
+"/cc radius" is the same as before.
+After that comes "pattern" and "target".
 Remember my example of the editors "find > replace"?
 It's exactly the same. Pattern is what you want the plugin to find,
-`target` is what you want it to be replaced with.
+"target" is what you want it to be replaced with.
 
 Let's do an example for that!
-Imagine you have a command that contains `Hi, Pete!` directly infront of you (you can try this ingame if you want)
-and you want it to say `Hello, Pete!`.
-Just tell the command what it has to find > `Hi`
-and the replacement > `Hello`.
+Imagine you have a command that contains "Hi, Pete!" directly infront of you (you can try this ingame if you want)
+and you want it to say "Hello, Pete!".
+Just tell the command what it has to find > "Hi"
+and the replacement > "Hello".
 
-So your full command is `/cc 5 Hi Hello`
+So your full command is "/cc 5 Hi Hello"
 
 BUT THOSE ARE ONLY SINGLE WORDS, HOW DO I CHANGE SENTENCES?
 
@@ -96,13 +101,13 @@ Wrong!
 
 Minecraft commands get split on every space before they are delivered to me.
 That means, i get a list of words where i can't tell where your pattern ends and your target starts.
-For that i have defined a `line-break` symbol, that you can use to mark the beginning and ending of sentences: `;/`
+For that i have defined a "line-break" symbol, that you can use to mark the beginning and ending of sentences: ";/"
 
 With that knowlege let's try a similar example:
-this time you have a command that contains `Hi, I'm Pete!`
-and you once again want it to change to `Hello, Pete!`.
+this time you have a command that contains "Hi, I'm Pete!"
+and you once again want it to change to "Hello, Pete!".
 
-The resulting command will be: `/cc 5 /; Hi, I'm ;/ Hello,`.
+The resulting command will be: "/cc 5 /; Hi, I'm ;/ Hello,".
 The last line-break can be left away, as it is redundant.
 
 BUT THERE WAS ANOTHER PARAMETER... ASSERTIONS?
@@ -114,24 +119,24 @@ BUT WHAT I WANT TO MAKE SURE THAT A STRING IS?
 We'll come to that later, for now let's just care for the assertion.
 
 Another example:
-this time, you have a lot of commands that either contain `Hi, I'm <MyName>!` or `Hi, I'm not <MyName>!`
+this time, you have a lot of commands that either contain "Hi, I'm <MyName>!" or "Hi, I'm not <MyName>!"
 but you only want to change the ones that indeed told their name.
 
-In this case: All the commands that do not contain the word `not`.
-So thats what your command would look like: `/cc 5 /; Hi, I'm ;/ Hello, ;/ not`
+In this case: All the commands that do not contain the word "not".
+So thats what your command would look like: "/cc 5 /; Hi, I'm ;/ Hello, ;/ not"
 
-NOTE: These explicit parameter-breaks `;/` have to be either used completely or not at all!
-`/cc 5 /; Hi, I'm Hello not` has too few arguments as `Hi, I'm Hello not` is read as pattern.
-`/cc 5 /; Hi, I'm ;/ Hello not` will replace `Hi, I'm` with `Hello not`
-`/cc 5 Hi, I'm ;/ Hello /; not` will replace `Hi,` with `I'm`, `Hello` is the assertion, and `not` will throw an error because of too many arguments
+NOTE: These explicit parameter-breaks ";/" have to be either used completely or not at all!
+"/cc 5 /; Hi, I'm Hello not" has too few arguments as "Hi, I'm Hello not" is read as pattern.
+"/cc 5 /; Hi, I'm ;/ Hello not" will replace "Hi, I'm" with "Hello not"
+"/cc 5 Hi, I'm ;/ Hello /; not" will replace "Hi," with "I'm", "Hello" is the assertion, and "not" will throw an error because of too many arguments
 
 ALRIGHT. WHAT ABOUT ALL THOSE OTHER COMMANDS?
 
-The next one will be `/commandblockcorrectfind`:
-Short: `/ccf`
+The next one will be "/commandblockcorrectfind":
+Short: "/ccf"
 
 The sytax is almost the same as /cc, except as you don't want to change any command but only find it,
-you only need `/ccf` radius pattern.
+you only need "/ccf" radius pattern.
 
 The plugin will then proceed to look for commands in your specified area
 and list them in your chat.
@@ -139,18 +144,18 @@ and list them in your chat.
 All commandblocks found can be clicked on in chat, which will teleport you to it's location.
 Nifty, eh?... No?... Ok let's continue then..
 
-Next is `/commandblockcorrecttest`:
-Short: `/cct`
+Next is "/commandblockcorrecttest":
+Short: "/cct"
 
-This one once again works like `/cc`, but instead of specifying an area to look in,
+This one once again works like "/cc", but instead of specifying an area to look in,
 you give it the input string straight away.
-The syntax is `/cct input pattern target assertion`
+The syntax is "/cct input pattern target assertion"
 
 The reason this command exists is, some pattern are too complicated to tell if they're working as intended right away,
 so this is your option to test if it's working!
 
-Example would be: `/cct ;/ Hi, I'm Steve! /; Hi, I'm ;/ Hello, ;/ not`
-Which the plugin would answer with `Result would be: Hello, Steve!`
+Example would be: "/cct ;/ Hi, I'm Steve! /; Hi, I'm ;/ Hello, ;/ not"
+Which the plugin would answer with "Result would be: Hello, Steve!"
 
 BUT I'M JUST WRITING PLAIN STRINGS, HOW IS THIS TOO COMPLICATED?
 
@@ -166,15 +171,15 @@ SO WHAT EXACTLY DOES THIS PATTERN DO?? I ONLY SEE SPECIAL CHARACTERS...
 
 Regex my friend.. Regex. But we'll come to that later ;)
 
-Next command is `/commandblockcorrectundo`:
-Short: `/ccu`
+Next command is "/commandblockcorrectundo":
+Short: "/ccu"
 
 If you noticed, that unwanted corrections were made,
 you can undo up to 5 correction commands you executed!
 
-this command also has the parameter `/ccu force` (Which is currently not working, punch me if i forget to remove this once it's working)
+this command also has the parameter "/ccu force" (Which is currently not working, punch me if i forget to remove this once it's working)
 which forces commandblocks that have been changed in direction or completely removed,
-to be put back in the state where the `/cc` command was executed.
+to be put back in the state where the "/cc" command was executed.
 
 Now, those were all the commands, any questions?
 
@@ -183,7 +188,7 @@ YOU SAID THIS CAN BE USED WITHOUT MINECRAFT AT ALL. HOW?
 Ah, yes, perfect timing! Now that you know how the plugin works,
 let's take care of the
 
-##Dedicated Version
+DEDICATED VERSION
 
 If the Jar is executed it will generate a config in the now existent "CommandCorrector" folder
 and another "Dedicated" folder.
@@ -225,31 +230,32 @@ Okay, let's have a look at the format of a correction:
 "pattern" : "target" | "assertion"
 
 Let's explain this piece by piece.
-You see `pattern` and `target`.
+You see "pattern" and "target".
 You can think of those like the "find > replace" of a text-editor
 Pattern is what you want the Jar to find,
-`target` is what you want it to be replaced with.
+"target" is what you want it to be replaced with.
 
 Let's do an example for that!
-Imagine you have a line in a file that contains `Hi, Pete!`
-and you want it to say `Hello, Pete!`.
-Just tell the Jar what it has to find > `Hi`
-and the replacement > `Hello`.
+Imagine you have a line in a file that contains "Hi, Pete!"
+and you want it to say "Hello, Pete!".
+Just tell the Jar what it has to find > "Hi"
+and the replacement > "Hello".
 
-So your full command is `"Hi" : "Hello" | ""`
+So your full command is ""Hi" : "Hello" | """
 
 About the last, in this example empty piece, the assertion.
 In some cases, you only want the correction to be happening when you can be sure, that a certain string is NOT the your line corrected.
 
 Another example:
-this time, you have a lot of lines that either contain `Hi, I'm <MyName>!` or `Hi, I'm not <MyName>!`
+this time, you have a lot of lines that either contain "Hi, I'm <MyName>!" or "Hi, I'm not <MyName>!"
 but you only want to change the ones that indeed told their name.
 
-In this case: All the lines that do not contain the word `not`.
-So thats what your correction would look like: `"Hi, I'm" : "Hello," | "not"`
+In this case: All the lines that do not contain the word "not".
+So thats what your correction would look like: ""Hi, I'm" : "Hello," | "not""
 
 
-##Regex
+REGEX
+
 
 ALRIGHT
 THIS IS NOT THE AVERAGE QUESTIONEER SPEAKING, IT'S ME!
