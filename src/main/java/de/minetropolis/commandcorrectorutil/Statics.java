@@ -59,7 +59,7 @@ public class Statics {
 
 	private static List<InterpretedPattern> processFile(String string) {
 		List<InterpretedPattern> list = new ArrayList<>();
-		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
+		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?[ \\t]*:[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"").matcher(string);
 		while (matcher.find()) {
 			list.add(interpretPattern(matcher.group(1)).fill(matcher.group(2), matcher.group(3)));
 		}
@@ -212,7 +212,6 @@ public class Statics {
 		int offset = 0;
 		while (matcher.find()) {
 			command = command.substring(0, matcher.start() + offset) + ip.target + command.substring(matcher.group().length() + matcher.start() + offset);
-			offset += ip.target.length() - matcher.group().length();
 			Group group = null;
 			if (!ip.groups.isEmpty())
 				group = ip.groups.get(0);
@@ -230,6 +229,7 @@ public class Statics {
 					string = groupMatcher.group(1);
 				}
 				command = command.replace(";:(" + i + ")", string);
+				offset += string.length() - matcher.group().length();
 				if (group != null && i < matcher.groupCount())
 					group = group.next();
 			}

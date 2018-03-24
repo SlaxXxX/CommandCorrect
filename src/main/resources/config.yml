@@ -71,4 +71,4 @@ hello there "pattern" : "replacement" | "assertion"
     
     
 NOTE: if you really want the exact syntax requirement for these entrys, have the regex pattern it's matched with:
-#--> (?:^|\n)[ \t]*\"(.+)\"[ \t]*\n?:[ \t]*\n?\"(.*)\"[ \t]*\n?\|[ \t]*\n?\"(.*)\"
+#--> (?:^|\n)[ \t]*\"(.+)\"[ \t]*\n?[ \t]*:[ \t]*\n?[ \t]*\"(.*)\"[ \t]*\n?\[ \t]*|[ \t]*\n?[ \t]*\"(.*)\"

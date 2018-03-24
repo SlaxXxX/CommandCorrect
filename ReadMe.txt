@@ -196,7 +196,7 @@ With the second way, you can also add the parameter "append".
 By default, the dedicated corrector corrects each line individually,
 but there might be some cases where you want multiple lines to be corrected.
 For that, you can use "append" which interprets the file as one single, long line,
-with the individual lines seperated by "\n".
+with the individual lines seperated by your Systems line seperator. In case of Windows it's "\r\n". (Linux is just "\n", and Mac is "\r")
 
 so a file like this:
 
@@ -204,7 +204,7 @@ so a file like this:
 	Second line
 	Third line
 	
-will be read in "append" mode as "First line\nSecond line\n Third line"
+will be read in "append" mode as "First line\r\nSecond line\r\nThird line"
 
 
 ALRIGHT
