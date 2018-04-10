@@ -14,7 +14,7 @@ import de.minetropolis.commandcorrectorutil.Notification;
 import de.minetropolis.commandcorrectorutil.Statics;
 
 public class DedicatedCorrector {
-    static boolean appendLines = false;
+    static boolean appendLines = true;
 
     public static void main(String[] args) {
         if (args.length > 0)
@@ -49,7 +49,7 @@ public class DedicatedCorrector {
                 e.printStackTrace();
             }
             if (appendLines)
-                fillLines = Arrays.asList(fillLines.stream().collect(Collectors.joining(System.lineSeparator())));
+                fillLines = Arrays.asList(fillLines.stream().collect(Collectors.joining("\n")));
             if (fillLines.size() > 0) {
                 file.delete();
                 OutputStreamWriter fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);

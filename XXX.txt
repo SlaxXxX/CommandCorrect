@@ -1,5 +1,0 @@
-this is a serious test.
-
-$pattern
-maybe not.
-marry me :(

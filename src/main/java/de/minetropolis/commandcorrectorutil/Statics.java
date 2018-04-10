@@ -15,7 +15,6 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.minetropolis.commandcorrector.CommandCorrector;
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -59,7 +58,7 @@ public class Statics {
 
 	private static List<InterpretedPattern> processFile(String string) {
 		List<InterpretedPattern> list = new ArrayList<>();
-		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?[ \\t]*:[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"").matcher(string);
+		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\\\"(.+)\\\"[ \\t]*\\n?:[ \\t]*\\n?[ \\t]*\\\"(.*)\\\"[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?\\\"(.*)\\\"").matcher(string);
 		while (matcher.find()) {
 			list.add(interpretPattern(matcher.group(1)).fill(matcher.group(2), matcher.group(3)));
 		}
@@ -137,13 +136,22 @@ public class Statics {
 				ip.groups.add(pos);
 			} else {
 				Group pos = new Group(ip, i, string.indexOf(")<;", i) + 1,
-					offset, offset += -2 + StringUtils.countMatches(string.substring(i + 2, string.indexOf(")<;", i)), "(") * 2,
+					offset, offset += -2 + countBrackets(string.substring(i + 2, string.indexOf(")<;", i))) * 2,
 					false, true);
 				ip.groups.add(pos);
 				i = string.indexOf(")<;", i);
 			}
 		}
 		return ip;
+	}
+
+	private static int countBrackets(String string) {
+		int count = 0;
+		for (int i = 0; i < string.length(); i++) {
+			if (string.charAt(i) == '(')
+				count++;
+		}
+		return 1;
 	}
 
 	public static InterpretedPattern escapeAll(InterpretedPattern ip) {
@@ -173,7 +181,7 @@ public class Statics {
 						group = ip.groups.get(ip.groups.indexOf(group) + 1);
 				}
 			} else {
-				String escaped = escape("" + ip.pattern.charAt(i));
+				String escaped = escape(1, "" + ip.pattern.charAt(i));
 				if (group != null && escaped.length() > 1)
 					group.addOffset(escaped.length() - 1, i);
 				sb.append(escaped);
@@ -183,12 +191,13 @@ public class Statics {
 		return ip;
 	}
 
-	private static String escape(String string) {
+	private static String escape(int layer, String string) {
 		String escapable = "\\/()[]{}?*+.$^|";
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < string.length(); i++) {
 			if (escapable.contains("" + string.charAt(i)))
-				sb.append("\\");
+				for (int l = layer; l > 0; l--)
+					sb.append("\\");
 			sb.append(string.charAt(i));
 		}
 		return sb.toString();
@@ -209,48 +218,59 @@ public class Statics {
 
 		Matcher matcher = Pattern.compile(ip.pattern).matcher(command);
 
-		int offset = 0;
+		List<StringPiece> stringPieces = new ArrayList<>();
 		while (matcher.find()) {
-			command = command.substring(0, matcher.start() + offset) + ip.target + command.substring(matcher.group().length() + matcher.start() + offset);
+			String target = ip.target;
 			Group group = null;
 			if (!ip.groups.isEmpty())
 				group = ip.groups.get(0);
 
 			for (int i = 1; i <= matcher.groupCount(); i++) {
-				String string = escape(matcher.group(i));
+				String string = matcher.group(i);
 				if (group != null && !group.group) {
+					String escaped = escape(3, string);
 					String rawGroup = ip.pattern.substring(group.start + group.startOffset, group.end + group.endOffset + 1);
-					Matcher groupMatcher = Pattern.compile("\\(\\?:" + string + "\\||\\|" + string + "\\||\\|" + string + "\\)").matcher(rawGroup);
-					groupMatcher.find();
-					rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());
-					groupMatcher.reset();
-					groupMatcher = Pattern.compile("\\|([^\\|]*?)\\)").matcher(rawGroup);
-					groupMatcher.find();
-					string = groupMatcher.group(1);
+					Matcher groupMatcher = Pattern.compile("\\(\\?:" + escaped + "\\||\\|" + escaped + "\\||\\|" + escaped + "\\)").matcher(rawGroup);
+					if (groupMatcher.find()) {
+						rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());
+						groupMatcher.reset();
+						groupMatcher = Pattern.compile("\\|([^\\|]*?)\\)").matcher(rawGroup);
+						groupMatcher.find();
+						string = groupMatcher.group(1);
+					}
 				}
-				command = command.replace(";:(" + i + ")", string);
-				offset += string.length() - matcher.group().length();
+				target = target.replace(";:(" + i + ")", string);
 				if (group != null && i < matcher.groupCount())
 					group = group.next();
 			}
 
-			Matcher outputGroup = Pattern.compile(";:(\\d+)\\((.+?)\\)(?::(!?)\\((.+?)\\)):;").matcher(command);
+			Matcher outputGroup = Pattern.compile(";:(\\d+)\\((.*?)\\)(?::(!?)\\((.*?)\\)):;").matcher(target);
 			int replaceOffset = 0;
 			while (outputGroup.find()) {
 				int index = Integer.parseInt(outputGroup.group(1));
 				if (matcher.groupCount() >= index) {
-					command = command.replace(outputGroup.group(), "");
+					target = target.replace(outputGroup.group(), "");
 					if (Pattern.compile(outputGroup.group(4)).matcher(matcher.group(index)).matches() ^ outputGroup.group(3).equals("!")) {
-						command = command.substring(0, outputGroup.start() - replaceOffset) + outputGroup.group(2) + command.substring(outputGroup.start() - replaceOffset, command.length());
+						target = target.substring(0, outputGroup.start() - replaceOffset) + outputGroup.group(2) + target.substring(outputGroup.start() - replaceOffset, target.length());
 						replaceOffset += outputGroup.group().length() - outputGroup.group(2).length();
 					} else {
 						replaceOffset += outputGroup.group().length();
 					}
 				}
 			}
+
+			stringPieces.add(new StringPiece(matcher.start(), matcher.end(), target));
 		}
 
-		return command;
+		StringBuilder newCommand = new StringBuilder();
+		int last = 0;
+		for (StringPiece sp : stringPieces) {
+			newCommand.append(command.substring(last, sp.start) + sp.string);
+			last = sp.end;
+		}
+		newCommand.append(command.substring(last));
+
+		return newCommand.toString();
 
 	}
 
@@ -283,5 +303,16 @@ public class Statics {
 			notification.add(new NotificationEntry(colorText, normalText, messages.get(i)));
 		}
 		return notification;
+	}
+}
+
+class StringPiece {
+	int start, end;
+	String string;
+
+	StringPiece(int start, int end, String string) {
+		this.start = start;
+		this.end = end;
+		this.string = string;
 	}
 }
