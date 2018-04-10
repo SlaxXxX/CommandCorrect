@@ -68,7 +68,7 @@ public class DedicatedCorrector {
                 Notification notification = Statics.notify(Statics.changeCommand(ip, newline));
                 notification.entries.forEach(notif -> System.out.println("Line " + finalI + " notifies: " + notif.message + ", at: " + notif.normalText));
                 newline = notification.command;
-                newline = newline.replaceAll(";\\\\", System.lineSeparator());
+                newline = newline.replaceAll(";\\\\|\n", System.lineSeparator());
             }
             returnString.add(newline);
         }
