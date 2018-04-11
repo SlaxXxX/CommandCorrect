@@ -272,7 +272,7 @@ public class Statics {
 						Matcher wordMatcher = Pattern.compile(words.get(j).get(k)).matcher(string);
 						if (wordMatcher.matches()) {
 							matched = true;
-							string = words.get(j).get(words.get(j).size() - 1);
+							string = removeUnescaped(words.get(j).get(words.get(j).size() - 1), '\\');
 							}
 						}
 					}

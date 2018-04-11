@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>de.minetropolis</groupId>
 	<artifactId>CommandCorrector</artifactId>
-	<version>6.5.0</version>
+	<version>6.5.1</version>
 	<packaging>jar</packaging>
 
 	<name>Command Corrector</name>
