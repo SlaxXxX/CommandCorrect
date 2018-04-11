@@ -151,7 +151,7 @@ public class Statics {
 			if (string.charAt(i) == '(')
 				count++;
 		}
-		return 1;
+		return count;
 	}
 
 	public static InterpretedPattern escapeAll(InterpretedPattern ip) {
@@ -203,6 +203,42 @@ public class Statics {
 		return sb.toString();
 	}
 
+	private static String removeUnescaped(String string, char c) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < string.length(); i++) {
+			if (string.charAt(i) == '\\' && i < string.length() - 1)
+				i++;
+			else if (string.charAt(i) == c)
+				continue;
+			sb.append(string.charAt(i));
+		}
+		return sb.toString();
+	}
+
+	private static List<List<String>> disassemble(String string) {
+		List<List<String>> disassembled = new ArrayList<>();
+		int start = 0;
+		for (int i = 0; i < string.length(); i++) {
+			if (string.charAt(i) == '|' && string.charAt(Math.max(i - 1, 0)) != '\\') {
+				disassembled.get(disassembled.size() - 1).add(string.substring(start, i));
+				start = i + 1;
+			}
+			if (string.charAt(i) == '(' && string.charAt(Math.max(i - 1, 0)) != '\\') {
+				disassembled.add(new ArrayList<String>());
+				if (i < string.length() - 2)
+					i += 2;
+				start = i + 1;
+			}
+			if (string.charAt(i) == ')' && string.charAt(Math.max(i - 1, 0)) != '\\') {
+				disassembled.get(disassembled.size() - 1).add(string.substring(start, i));
+				if (i < string.length() - 2)
+					i++;
+			}
+		}
+
+		return disassembled;
+	}
+
 	public static String changeCommand(InterpretedPattern ip, String command) {
 		//System.out.println(command + " || " + pattern + " || " + target);
 		//Bukkit.getLogger().log(Level.WARNING, "Pattern: " + ip.pattern + "; Target: " + ip.target + "; Command: " + command);
@@ -228,15 +264,17 @@ public class Statics {
 			for (int i = 1; i <= matcher.groupCount(); i++) {
 				String string = matcher.group(i);
 				if (group != null && !group.group) {
-					String escaped = escape(3, string);
-					String rawGroup = ip.pattern.substring(group.start + group.startOffset, group.end + group.endOffset + 1);
-					Matcher groupMatcher = Pattern.compile("\\(\\?:" + escaped + "\\||\\|" + escaped + "\\||\\|" + escaped + "\\)").matcher(rawGroup);
-					if (groupMatcher.find()) {
-						rawGroup = rawGroup.substring(groupMatcher.start(), rawGroup.length());
-						groupMatcher.reset();
-						groupMatcher = Pattern.compile("\\|([^\\|]*?)\\)").matcher(rawGroup);
-						groupMatcher.find();
-						string = groupMatcher.group(1);
+					String raw = ip.pattern.substring(group.start + group.startOffset + 1, group.end + group.endOffset + 1);
+					List<List<String>> words = disassemble(raw);
+					boolean matched = false;
+					for (int j = 0; j < words.size() && !matched; j++) {
+						for (int k = 0; k < words.get(j).size() && !matched; k++) {
+						Matcher wordMatcher = Pattern.compile(words.get(j).get(k)).matcher(string);
+						if (wordMatcher.matches()) {
+							matched = true;
+							string = words.get(j).get(words.get(j).size() - 1);
+							}
+						}
 					}
 				}
 				target = target.replace(";:(" + i + ")", string);

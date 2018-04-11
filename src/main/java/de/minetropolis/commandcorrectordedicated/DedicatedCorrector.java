@@ -14,7 +14,7 @@ import de.minetropolis.commandcorrectorutil.Notification;
 import de.minetropolis.commandcorrectorutil.Statics;
 
 public class DedicatedCorrector {
-    static boolean appendLines = true;
+    static boolean appendLines = false;
 
     public static void main(String[] args) {
         if (args.length > 0)
