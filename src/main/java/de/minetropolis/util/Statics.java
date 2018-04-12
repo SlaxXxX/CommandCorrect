@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrectorutil;
+package de.minetropolis.util;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 
-import de.minetropolis.commandcorrectorutil.NotificationEntry;
+import de.minetropolis.util.NotificationEntry;
 
 public class Statics {
 
@@ -338,7 +338,7 @@ public class Statics {
 					.append(">!<").append(pattern.substring(positions.get(i),
 						Math.min(positions.get(i) + 20, pattern.length())))
 					.toString();
-			notification.add(new NotificationEntry(colorText, normalText, messages.get(i)));
+			notification.add(colorText, normalText, messages.get(i));
 		}
 		return notification;
 	}

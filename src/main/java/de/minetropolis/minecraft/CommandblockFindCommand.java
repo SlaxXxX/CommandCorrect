@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.minecraft;
 
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
@@ -9,7 +9,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import de.minetropolis.commandcorrectorutil.Statics;
+import de.minetropolis.util.Statics;
 
 import java.util.*;
 

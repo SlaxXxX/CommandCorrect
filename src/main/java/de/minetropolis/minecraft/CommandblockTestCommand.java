@@ -1,12 +1,12 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.minecraft;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import de.minetropolis.commandcorrectorutil.InterpretedPattern;
-import de.minetropolis.commandcorrectorutil.Notification;
-import de.minetropolis.commandcorrectorutil.Statics;
+import de.minetropolis.util.InterpretedPattern;
+import de.minetropolis.util.Notification;
+import de.minetropolis.util.Statics;
 
 import java.util.*;
 

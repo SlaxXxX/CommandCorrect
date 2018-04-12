@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrectordedicated;
+package de.minetropolis.dedicated;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -9,9 +9,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.minetropolis.commandcorrectorutil.InterpretedPattern;
-import de.minetropolis.commandcorrectorutil.Notification;
-import de.minetropolis.commandcorrectorutil.Statics;
+import de.minetropolis.util.InterpretedPattern;
+import de.minetropolis.util.Notification;
+import de.minetropolis.util.Statics;
 
 public class DedicatedCorrector {
     static boolean appendLines = false;

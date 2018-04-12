@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrectorutil;
+package de.minetropolis.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ public class Notification {
 	public Notification(String cmd) {
 		command = cmd;
 	}
-	void add(NotificationEntry entry){
-		entries.add(entry);
+	void add(String color, String normal, String msg){
+		entries.add(new NotificationEntry(color, normal, msg));
 	}
 }

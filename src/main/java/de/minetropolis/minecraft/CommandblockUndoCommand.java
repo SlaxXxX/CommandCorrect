@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.minecraft;
 
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -8,9 +8,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import de.minetropolis.commandcorrectorutil.Statics;
-import de.minetropolis.commandcorrectorutil.Corrections.CommandData;
-import de.minetropolis.commandcorrectorutil.Corrections.Correction;
+import de.minetropolis.util.Statics;
+import de.minetropolis.util.Corrections.CommandData;
+import de.minetropolis.util.Corrections.Correction;
 
 import java.util.*;
 

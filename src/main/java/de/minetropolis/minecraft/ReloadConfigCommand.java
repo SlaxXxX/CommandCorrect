@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrector;
+package de.minetropolis.minecraft;
 
 import java.util.Objects;
 import org.bukkit.command.Command;

@@ -1,4 +1,4 @@
-package de.minetropolis.commandcorrectorutil;
+package de.minetropolis.util;
 
 import java.util.ArrayList;
 import java.util.HashMap;
