@@ -7,16 +7,15 @@ public class Escaped extends Group {
 	}
 
 	@Override
-	public Group apply() {
+	public String apply() {
 		String escapable = "\\/()[]{}?*+.$^|";
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < content.length(); i++) {
 			if (escapable.contains("" + content.charAt(i)))
 				sb.append("\\");
 			sb.append(content.charAt(i));
-		}
-		content = sb.toString();
-		return this;
+		} 
+		return sb.toString();
 	}
 
 	@Override

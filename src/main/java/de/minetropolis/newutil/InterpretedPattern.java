@@ -50,7 +50,7 @@ public class InterpretedPattern {
 			return null;
 		}
 
-		groups.forEach(Group::apply);
+		groups.forEach(group -> group.setContent(group.apply()));
 		buildPattern();
 		return this;
 	}
@@ -62,8 +62,8 @@ public class InterpretedPattern {
 			int special = (pattern.indexOf(";?(", i) == -1) ? Integer.MAX_VALUE : pattern.indexOf(";?(", i);
 			int autoconvert = (pattern.indexOf(";>(", i) == -1) ? Integer.MAX_VALUE : pattern.indexOf(";>(", i);
 			if (Math.min(special, autoconvert) == Integer.MAX_VALUE) {
-				if(start < pattern.length())
-				groups.add(new Escaped(pattern.substring(start, pattern.length())));
+				if (start < pattern.length())
+					groups.add(new Escaped(pattern.substring(start, pattern.length())));
 				return;
 			}
 			i = Math.min(special, autoconvert);
@@ -89,39 +89,49 @@ public class InterpretedPattern {
 	}
 
 	private int processSpecial(int pos) throws UnbalancedBracketException {
+		int count = 1;
+		int i;
+		for (i = pos + 3; i < pattern.length() && count > 0; i++) {
+			if (pattern.charAt(i) == '(')
+				count++;
+			if (pattern.charAt(i) == ')')
+				count--;
+		}
+		if (count > 0)
+			throw new UnbalancedBracketException();
+		if (pattern.substring(pos).startsWith(";?(?:"))
+			groups.add(new Noncapturing(pattern.substring(pos, i)));
+		else
+			groups.add(new Special(pattern.substring(pos, i)));
+		makeNormals(findBrackets(pattern.substring(pos + 3, i - 1)), pattern.substring(pos + 3, i - 1));
+		return i;
+	}
+
+	private List<List<Integer>> findBrackets(String string) throws UnbalancedBracketException {
 		int depth = 0;
 		List<List<Integer>> brackets = new ArrayList<>();
 		brackets.add(new ArrayList<>());
-		int i;
-		for (i = pos + 3; i < pattern.length(); i++) {
-			if (pattern.charAt(i) == '(' && !Statics.isEscaped(pattern, i)) {
+		for (int i = 0; i < string.length(); i++) {
+			if (string.charAt(i) == '(' && !Statics.isEscaped(string, i)) {
 				brackets.get(depth).add(i);
 				depth++;
 				if (depth > brackets.size() - 1)
 					brackets.add(new ArrayList<>());
 			}
-			if (pattern.charAt(i) == ')' && !Statics.isEscaped(pattern, i)) {
+			if (string.charAt(i) == ')' && !Statics.isEscaped(string, i)) {
 				depth--;
-				if (depth == -1)
-					break;
 				brackets.get(depth).add(i + 1);
 			}
-
 		}
-		if (depth > -1)
+		if (depth > 0)
 			throw new UnbalancedBracketException();
-		if (pattern.substring(pos).startsWith(";?(?:"))
-			groups.add(new Noncapturing(pattern.substring(pos, i + 1)));
-		else
-			groups.add(new Special(pattern.substring(pos, i + 1)));
-		makeNormals(brackets);
-		return i + 1;
+		return brackets;
 	}
 
-	private void makeNormals(List<List<Integer>> brackets) {
+	private void makeNormals(List<List<Integer>> brackets, String string) {
 		for (List<Integer> bracket : brackets) {
 			for (int i = 0; i < bracket.size(); i += 2) {
-				if (pattern.substring(bracket.get(i), bracket.get(i) + 3).equals("(?:")) {
+				if (string.substring(bracket.get(i), bracket.get(i) + 3).equals("(?:")) {
 					bracket.remove(i);
 					bracket.remove(i);
 				}
@@ -144,15 +154,19 @@ public class InterpretedPattern {
 				return o1.get(0).compareTo(o2.get(0));
 			}
 		});
-		brackets.forEach(bracket -> groups.add(new Normal(pattern.substring(bracket.get(0), bracket.get(1)))));
+		brackets.forEach(bracket -> groups.add(new Normal(string.substring(bracket.get(0), bracket.get(1)))));
 	}
 
-	private int processAutoconvert(int pos, String endString) throws MalformedAutoconvert {
-		Matcher matcher = Pattern.compile(";>(?:\\((?:\".+?\"\\|)+?\".+?\"\\)\\|)*?\\((?:\".+?\"\\|)+?\".+?\"\\)<;").matcher(pattern.substring(pos));
+	private int processAutoconvert(int pos, String endString) throws MalformedAutoconvert, UnbalancedBracketException {
+		Matcher matcher = Pattern.compile(";>(?:\\((?:.+?\\|)+?.+?\\)\\|)*?\\((?:.+?\\|)+?.+?\\)<;").matcher(pattern.substring(pos));
 		if (!matcher.find())
 			throw new MalformedAutoconvert();
 
-		groups.add(new Autoconvert(matcher.group()));
+		Group autoconvert = new Autoconvert(matcher.group());
+		groups.add(autoconvert);
+		String innerString = autoconvert.apply().substring(1, autoconvert.apply().length() - 1);
+		makeNormals(findBrackets(innerString), innerString);
+
 		return pos + matcher.end();
 	}
 

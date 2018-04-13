@@ -9,13 +9,13 @@ public class Autoconvert extends Group {
 	}
 
 	@Override
-	public Group apply() {
-		content = "(" + content.substring(2, content.length() - 2).replaceAll("\\(", "(?:") + ")";
-		for (int i = 0; i < content.length(); i++) {
-			if (content.charAt(i) == '"' && !Statics.isEscaped(content, i))
-				content = content.substring(0, i) + content.substring(i + 1);
+	public String apply() {
+		String applied = "(" + content.substring(2, content.length() - 2) + ")";//.replaceAll("\\(", "(?:") + ")";
+		for (int i = 0; i < applied.length(); i++) {
+			if (applied.charAt(i) == '"' && !Statics.isEscaped(applied, i))
+				applied = applied.substring(0, i) + applied.substring(i + 1);
 		}
-		return this;
+		return applied;
 	}
 
 	@Override

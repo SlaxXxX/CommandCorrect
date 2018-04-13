@@ -7,8 +7,8 @@ public class Normal extends Group {
 	}
 
 	@Override
-	public Group apply() {
-		return this;
+	public String apply() {
+		return content;
 	}
 
 	@Override

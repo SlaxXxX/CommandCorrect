@@ -109,6 +109,7 @@ public class Statics {
 	}
 
 	public static String removeSlashes(String string, int pos) {
+
 		int slashCount = 1;
 		while (pos - slashCount > 0 && string.charAt(pos - slashCount) == '\\') {
 			if (slashCount % 2 == 1)
@@ -116,6 +117,16 @@ public class Statics {
 			slashCount++;
 		}
 		return string;
+	}
+
+	public static String unescape(String string) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < string.length(); i++) {
+			if (string.charAt(i) == '\\')
+				i++;
+			sb.append(string.charAt(i));
+		}
+		return sb.toString();
 	}
 
 	public static String changeCommand(InterpretedPattern ip, String command) {
@@ -126,31 +137,61 @@ public class Statics {
 
 		Matcher matcher = Pattern.compile(ip.pattern).matcher(command);
 
-		String target = ip.target;
-
 		while (matcher.find()) {
 			if (!ip.assertion.isEmpty() && !ip.assertion.startsWith("G;")) {
 				if (Pattern.compile(ip.assertion).matcher(matcher.group()).find())
-					return command;
+					continue;
 			}
+			command = command.substring(0, matcher.start()) + ip.target + command.substring(matcher.end());
 
-			int i = 0;
-			for (Group group : ip.groups.stream().filter(group -> group.getType() == GroupType.NORMAL ||
-				group.getType() == GroupType.SPECIAL ||
-				group.getType() == GroupType.AUTOCONVERT).collect(Collectors.toList())) {
-				i++;
-				if (group.getType() == GroupType.NORMAL || group.getType() == GroupType.SPECIAL)
-					target = target.replace(";:(" + i + ")", matcher.group(i));
-				if (group.getType() == GroupType.AUTOCONVERT) {
-					String[] conversions = group.getContent().substring(4, group.getContent().length() - 2).split("\\)\\|\\(\\?:");
-					final int index = i;
-					String match = Arrays.asList(conversions).stream().filter(conversion -> Pattern.matches(conversion, matcher.group(index))).findFirst().orElse("");
-					target = target.replace(";:(" + i + ")", match.split("\\|")[match.split("\\|").length - 1]);
-				}
-			}
-			command = target;
+			command = applyGroups(command, matcher, ip.groups);
+			command = applyDisplayGroup(command, matcher);
 		}
 
+		return command;
+	}
+
+	private static String applyGroups(String command, Matcher matcher, List<Group> groups) {
+		int i = 0;
+		for (Group group : groups.stream().filter(group -> group.getType() == GroupType.NORMAL ||
+			group.getType() == GroupType.SPECIAL ||
+			group.getType() == GroupType.AUTOCONVERT).collect(Collectors.toList())) {
+			i++;
+			if ((group.getType() == GroupType.NORMAL || group.getType() == GroupType.SPECIAL) && matcher.groupCount() >= i && matcher.group(i) != null)
+				command = command.replace(";:(" + i + ")", matcher.group(i));
+			if (group.getType() == GroupType.AUTOCONVERT) {
+				String[] conversions = group.getContent().substring(4, group.getContent().length() - 2).split("\\)\\|\\(\\?:");
+				final int index = i;
+				String match = Arrays.asList(conversions).stream().filter(conversion -> Pattern.matches(conversion, matcher.group(index))).findFirst().orElse("");
+				command = command.replace(";:(" + i + ")", unescape(replaceGroupReferences(match.split("\\|")[match.split("\\|").length - 1], matcher)));
+			}
+		}
+		return command;
+	}
+
+	private static String replaceGroupReferences(String command, Matcher matcher) {
+		for (int i = 1; i < matcher.groupCount(); i++) {
+			if (matcher.group(i) != null)
+				command = command.replace("\\" + i, matcher.group(i));
+		}
+		return command;
+	}
+
+	private static String applyDisplayGroup(String command, Matcher matcher) {
+		Pattern outputPattern = Pattern.compile(";:(\\d+)\\((.*?)\\)(?::(!?)\\((.*?)\\)):;");
+		Matcher outputGroup;
+		do {
+			outputGroup = outputPattern.matcher(command);
+			if (outputGroup.find()) {
+				int index = Integer.parseInt(outputGroup.group(1));
+				if (matcher.groupCount() >= index) {
+					command = command.replace(outputGroup.group(), "");
+					String content = (matcher.group(index) == null) ? "" : matcher.group(index);
+					if (Pattern.compile(outputGroup.group(4)).matcher(content).matches() ^ outputGroup.group(3).equals("!"))
+						command = command.substring(0, outputGroup.start()) + outputGroup.group(2) + command.substring(outputGroup.start());
+				}
+			}
+		} while (outputGroup.find());
 		return command;
 	}
 

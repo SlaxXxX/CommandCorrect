@@ -7,9 +7,8 @@ public class Noncapturing extends Group {
 	}
 
 	@Override
-	public Group apply() {
-		content = content.substring(2);
-		return this;
+	public String apply() {
+		return content.substring(2);
 	}
 
 	@Override
