@@ -8,9 +8,9 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import de.minetropolis.util.Statics;
-import de.minetropolis.util.Corrections.CommandData;
-import de.minetropolis.util.Corrections.Correction;
+import de.minetropolis.newutil.Statics;
+import de.minetropolis.newutil.Corrections.CommandData;
+import de.minetropolis.newutil.Corrections.Correction;
 
 import java.util.*;
 

@@ -5,13 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import de.minetropolis.util.InterpretedPattern;
-import de.minetropolis.util.Notification;
-import de.minetropolis.util.Statics;
+import de.minetropolis.newutil.InterpretedPattern;
+import de.minetropolis.newutil.Notification;
+import de.minetropolis.newutil.Statics;
 
 public class DedicatedCorrector {
     static boolean appendLines = false;

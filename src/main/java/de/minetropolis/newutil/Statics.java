@@ -130,7 +130,7 @@ public class Statics {
 	}
 
 	public static String changeCommand(InterpretedPattern ip, String command) {
-		if (ip.assertion.startsWith("G;")) {
+		if (!ip.assertion.isEmpty()) {
 			if (Pattern.compile(ip.assertion).matcher(command).find())
 				return command;
 		}
@@ -138,8 +138,8 @@ public class Statics {
 		Matcher matcher = Pattern.compile(ip.pattern).matcher(command);
 
 		while (matcher.find()) {
-			if (!ip.assertion.isEmpty() && !ip.assertion.startsWith("G;")) {
-				if (Pattern.compile(ip.assertion).matcher(matcher.group()).find())
+			if (ip.assertion.startsWith("L;")) {
+				if (Pattern.compile(ip.assertion.substring(2)).matcher(matcher.group()).find())
 					continue;
 			}
 			command = command.substring(0, matcher.start()) + ip.target + command.substring(matcher.end());

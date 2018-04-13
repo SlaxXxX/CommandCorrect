@@ -18,10 +18,10 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import de.minetropolis.util.InterpretedPattern;
-import de.minetropolis.util.Notification;
-import de.minetropolis.util.Statics;
-import de.minetropolis.util.Corrections.Correction;
+import de.minetropolis.newutil.InterpretedPattern;
+import de.minetropolis.newutil.Notification;
+import de.minetropolis.newutil.Statics;
+import de.minetropolis.newutil.Corrections.Correction;
 
 public class CommandblockCorrectCommand implements CommandExecutor {
 
@@ -83,7 +83,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
     private List<InterpretedPattern> getChangeRule(String pattern, String target, String assertion) {
         if (pattern != null && target != null && assertion != null && !pattern.isEmpty()) {
             List<InterpretedPattern> changeRule = new ArrayList<>();
-            changeRule.add(Statics.interpretPattern(pattern).fill(target, assertion));
+            changeRule.add(new InterpretedPattern(pattern,target, assertion).compile());
             return changeRule;
         } else {
             return Collections.unmodifiableList(defaultChangeRules);

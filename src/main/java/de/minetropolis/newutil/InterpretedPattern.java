@@ -50,7 +50,6 @@ public class InterpretedPattern {
 			return null;
 		}
 
-		groups.forEach(group -> group.setContent(group.apply()));
 		buildPattern();
 		return this;
 	}
@@ -85,6 +84,7 @@ public class InterpretedPattern {
 	}
 
 	private void buildPattern() {
+		groups.forEach(group -> group.setContent(group.apply()));
 		pattern = groups.stream().filter(group -> group.getType() != GroupType.NORMAL).map(group -> group.getContent()).collect(Collectors.joining());
 	}
 
@@ -134,6 +134,7 @@ public class InterpretedPattern {
 				if (string.substring(bracket.get(i), bracket.get(i) + 3).equals("(?:")) {
 					bracket.remove(i);
 					bracket.remove(i);
+					i -= 2;
 				}
 			}
 		}

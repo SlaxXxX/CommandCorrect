@@ -1,4 +1,4 @@
-package de.minetropolis.util;
+package de.minetropolis.oldutil;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,7 +23,7 @@ import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Entity;
 
-import de.minetropolis.util.NotificationEntry;
+import de.minetropolis.oldutil.NotificationEntry;
 
 public class Statics {
 

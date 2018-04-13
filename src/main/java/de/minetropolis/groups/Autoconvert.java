@@ -1,7 +1,5 @@
 package de.minetropolis.groups;
 
-import de.minetropolis.newutil.Statics;
-
 public class Autoconvert extends Group {
 
 	public Autoconvert(String content) {
@@ -10,10 +8,18 @@ public class Autoconvert extends Group {
 
 	@Override
 	public String apply() {
-		String applied = "(" + content.substring(2, content.length() - 2) + ")";//.replaceAll("\\(", "(?:") + ")";
+		String applied = "(" + content.substring(2, content.length() - 2) + ")";
+		int count = 0;
 		for (int i = 0; i < applied.length(); i++) {
-			if (applied.charAt(i) == '"' && !Statics.isEscaped(applied, i))
-				applied = applied.substring(0, i) + applied.substring(i + 1);
+			if (applied.charAt(i) == '(') {
+				if (count == 1) {
+					applied = applied.substring(0, i + 1) + "?:" + applied.substring(i + 1);
+					i += 2;
+				}
+				count++;
+			}
+			if (applied.charAt(i) == ')')
+				count--;
 		}
 		return applied;
 	}

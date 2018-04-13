@@ -1,4 +1,4 @@
-package de.minetropolis.util;
+package de.minetropolis.oldutil;
 
 import java.util.ArrayList;
 import java.util.List;

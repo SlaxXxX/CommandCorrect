@@ -11,16 +11,14 @@ import org.bukkit.Location;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.material.Command;
-import org.bukkit.material.Directional;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
-import de.minetropolis.util.Corrections;
-import de.minetropolis.util.Statics;
+import de.minetropolis.newutil.Corrections;
+import de.minetropolis.newutil.Statics;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;

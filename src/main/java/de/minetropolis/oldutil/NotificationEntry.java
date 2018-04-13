@@ -1,4 +1,4 @@
-package de.minetropolis.util;
+package de.minetropolis.oldutil;
 
 public class NotificationEntry {
 	public String colorText;
