@@ -88,9 +88,12 @@ public class UnitTests extends Assert {
 		equals("@s[gamemode=spectator]",Statics.changeCommand(ip, "@s[gamemode=sp]"));
 		equals("@a[gamemode=creative]",Statics.changeCommand(ip, "@a[g=1]"));
 		equals("@r[gamemode=creative]",Statics.changeCommand(ip, "@r[gamemode=creative]"));
+		
+		equals("[A]",Statics.changeCommand(new InterpretedPattern(";>(\\((\\w)\\)|\\[\\2\\])<;",";:(1)", "").compile(), "(A)"));
+		equals("\\Test\\",Statics.changeCommand(new InterpretedPattern(";>(Test|\\\\Test\\\\)<;",";:(1)", "").compile(), "Test"));
 	}
 	
-	private void equals(String expected, String actual) {
+	private void equals(String actual, String expected) {
 		ec.checkThat(expected, CoreMatchers.equalTo(actual));
 	}
 }

@@ -142,7 +142,8 @@ public class Statics {
 				if (Pattern.compile(ip.assertion.substring(2)).matcher(matcher.group()).find())
 					continue;
 			}
-			command = command.substring(0, matcher.start()) + ip.target + command.substring(matcher.end());
+			command = command.substring(0, matcher.start()) + ip.target + 
+				(matcher.end() < command.length() ? command.substring(matcher.end()) : "");
 
 			command = applyGroups(command, matcher, ip.groups);
 			command = applyDisplayGroup(command, matcher);
@@ -170,7 +171,7 @@ public class Statics {
 	}
 
 	private static String replaceGroupReferences(String command, Matcher matcher) {
-		for (int i = 1; i < matcher.groupCount(); i++) {
+		for (int i = 1; i <= matcher.groupCount(); i++) {
 			if (matcher.group(i) != null)
 				command = command.replace("\\" + i, matcher.group(i));
 		}
@@ -180,9 +181,11 @@ public class Statics {
 	private static String applyDisplayGroup(String command, Matcher matcher) {
 		Pattern outputPattern = Pattern.compile(";:(\\d+)\\((.*?)\\)(?::(!?)\\((.*?)\\)):;");
 		Matcher outputGroup;
+		boolean match = false;
 		do {
 			outputGroup = outputPattern.matcher(command);
-			if (outputGroup.find()) {
+			match = outputGroup.find();
+			if (match) {
 				int index = Integer.parseInt(outputGroup.group(1));
 				if (matcher.groupCount() >= index) {
 					command = command.replace(outputGroup.group(), "");
@@ -191,7 +194,7 @@ public class Statics {
 						command = command.substring(0, outputGroup.start()) + outputGroup.group(2) + command.substring(outputGroup.start());
 				}
 			}
-		} while (outputGroup.find());
+		} while (match);
 		return command;
 	}
 
