@@ -1,8 +1,8 @@
 "$pattern" : "replacement" | "assertion"
 
-"$pattern2" : "replacement" | ""
+"$pattern2" : "replacement"
 
-"$pattern": "replacement" |"assertion"
+"$pattern3": "replacement" |""
 
 "$pattern":
 "replacement"|
@@ -12,7 +12,7 @@
     : "replacement"
     | "assertion"
 
-"$pattern3":
+"$pattern":
 	"replacement"	|	"assertion"
 
 "$pattern4"
@@ -35,7 +35,6 @@ Here is a real Example:
 
 # ";?([\\[, ]{1});>(g|gamemode)<;;?(?: *)=;?(?: *);>(0|s|survival)|(1|c|creative)|(2|a|adventure)|(3|sp|spectator)<;;?([\\], ]{1})":
 #	";:(1);:(2)=;:(3);:(4)"
-#|	""
 
 it replaces every g=1 or g=s or gamemode=3 or g=spectator through the now in 1.13 valid syntax gamemode=fulldescription
 
@@ -44,9 +43,6 @@ invalid is for example:
 
 pattern : replacement | assertion
 #--> missing quotes
-
-"pattern" : "replacement"
-#--> no assertion
 
 "pattern" | "assertion"
 #--> no replacement
@@ -71,4 +67,4 @@ hello there "pattern" : "replacement" | "assertion"
     
     
 NOTE: if you really want the exact syntax requirement for these entrys, have the regex pattern it's matched with:
-#--> (?:^|\n)[ \t]*\"(.+)\"[ \t]*\n?[ \t]*:[ \t]*\n?[ \t]*\"(.*)\"[ \t]*\n?\[ \t]*|[ \t]*\n?[ \t]*\"(.*)\"
+#--> (?:^|\n)[ \t]*"(.+)"[ \t]*\n?[ \t]*:[ \t]*\n?[ \t]*"(.*)"(?:[ \t]*\n?[ \t]*\|[ \t]*\n?[ \t]*"(.*)")?
