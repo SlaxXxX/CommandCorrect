@@ -64,7 +64,5 @@ hello there "pattern" : "replacement" | "assertion"
 	#--> for maximum line spacing see $pattern4.
     
     
-    
-    
 NOTE: if you really want the exact syntax requirement for these entrys, have the regex pattern it's matched with:
-#--> (?:^|\n)[ \t]*"(.+)"[ \t]*\n?[ \t]*:[ \t]*\n?[ \t]*"(.*)"(?:[ \t]*\n?[ \t]*\|[ \t]*\n?[ \t]*"(.*)")?
+#--> (?<=^|\n)[ \t]*"(.+)"[ \t]*\n?[ \t]*:[ \t]*\n?[ \t]*"(.*?)"(?:[ \t]*\n?[ \t]*\|[ \t]*\n?[ \t]*"(.*)")?[ \t]*(?=$|\n)

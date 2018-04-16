@@ -92,7 +92,7 @@ public class Statics {
 
 	private static List<InterpretedPattern> processFile(String string) {
 		List<InterpretedPattern> list = new ArrayList<>();
-		Matcher matcher = Pattern.compile("(?:^|\\n)[ \\t]*\"(.+)\"[ \\t]*\\n?[ \\t]*:[ \\t]*\\n?[ \\t]*\"(.*)\"(?:[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?[ \\t]*\"(.*)\")?").matcher(string);
+		Matcher matcher = Pattern.compile("(?<=^|\\n)[ \\t]*\"(.+)\"[ \\t]*\\n?[ \\t]*:[ \\t]*\\n?[ \\t]*\"(.*?)\"(?:[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?[ \\t]*\"(.*)\")?[ \\t]*(?=$|\\n)").matcher(string);
 		while (matcher.find()) {
 			InterpretedPattern pattern = new InterpretedPattern(matcher.group(1), matcher.group(2), matcher.group(3)).compile();
 			if (pattern != null)
