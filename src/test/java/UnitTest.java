@@ -8,7 +8,7 @@ import de.minetropolis.newutil.InterpretedPattern;
 import de.minetropolis.newutil.Statics;
 import junit.framework.Assert;
 
-public class UnitTests extends Assert {
+public class UnitTest extends Assert {
 
 	@Rule
 	public ErrorCollector ec = new ErrorCollector();

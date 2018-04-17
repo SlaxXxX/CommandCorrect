@@ -94,7 +94,7 @@ public class Statics {
 		List<InterpretedPattern> list = new ArrayList<>();
 		Matcher matcher = Pattern.compile("(?<=^|\\n)[ \\t]*\"(.+)\"[ \\t]*\\n?[ \\t]*:[ \\t]*\\n?[ \\t]*\"(.*?)\"(?:[ \\t]*\\n?[ \\t]*\\|[ \\t]*\\n?[ \\t]*\"(.*)\")?[ \\t]*(?=$|\\n)").matcher(string);
 		while (matcher.find()) {
-			InterpretedPattern pattern = new InterpretedPattern(matcher.group(1), matcher.group(2), matcher.group(3)).compile();
+			InterpretedPattern pattern = new InterpretedPattern(matcher.group(1), matcher.group(2), (matcher.group(3) == null ? "" : matcher.group(3))).compile();
 			if (pattern != null)
 				list.add(pattern);
 		}

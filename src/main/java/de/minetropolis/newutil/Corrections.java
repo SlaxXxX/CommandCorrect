@@ -9,7 +9,7 @@ import org.bukkit.Location;
 public class Corrections {
 
 	private ArrayList<Correction> corrections = new ArrayList<>();
-	private final int MAX_UNDO = 5;
+	private final int MAX_UNDO = 20;
 
 	public Correction makeNew() {
 		corrections.add(new Correction());
