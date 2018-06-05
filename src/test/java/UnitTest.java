@@ -84,13 +84,13 @@ public class UnitTest extends Assert {
 	public void testStatics() {
 		InterpretedPattern ip = new InterpretedPattern(";?([\\[,]{1});?(?: *);>(g|gamemode)<;;?(?: *)=;?(?: *);>(0|s|survival)|(1|c|creative)|(2|a|adventure)|(3|sp|spectator)<;;?(?: *);?([\\],]{1})"
 			,";:(1);:(2)=;:(3);:(4)", "").compile();
-		equals("@a[gamemode=survival]",Statics.changeCommand(ip, "@a[g=s]"));
-		equals("@s[gamemode=spectator]",Statics.changeCommand(ip, "@s[gamemode=sp]"));
-		equals("@a[gamemode=creative]",Statics.changeCommand(ip, "@a[g=1]"));
-		equals("@r[gamemode=creative]",Statics.changeCommand(ip, "@r[gamemode=creative]"));
+		equals("@a[gamemode=survival]",Statics.changeCommand(ip, "@a[g=s]",null));
+		equals("@s[gamemode=spectator]",Statics.changeCommand(ip, "@s[gamemode=sp]",null));
+		equals("@a[gamemode=creative]",Statics.changeCommand(ip, "@a[g=1]",null));
+		equals("@r[gamemode=creative]",Statics.changeCommand(ip, "@r[gamemode=creative]",null));
 		
-		equals("[A]",Statics.changeCommand(new InterpretedPattern(";>(\\((\\w)\\)|\\[\\2\\])<;",";:(1)", "").compile(), "(A)"));
-		equals("\\Test\\",Statics.changeCommand(new InterpretedPattern(";>(Test|\\\\Test\\\\)<;",";:(1)", "").compile(), "Test"));
+		equals("[A]",Statics.changeCommand(new InterpretedPattern(";>(\\((\\w)\\)|\\[\\2\\])<;",";:(1)", "").compile(), "(A)",null));
+		equals("\\Test\\",Statics.changeCommand(new InterpretedPattern(";>(Test|\\\\Test\\\\)<;",";:(1)", "").compile(), "Test",null));
 	}
 	
 	private void equals(String actual, String expected) {

@@ -1,6 +1,9 @@
 package de.minetropolis.dedicated;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
 import de.minetropolis.newutil.InterpretedPattern;
 import de.minetropolis.newutil.Notification;
@@ -33,15 +36,7 @@ public class CommandTester {
 
 //		            "This is a test",
 //		            "This is a fail"
-		
-		"TCP-2293",
-		"TEST CASE",
-		"FTL 16.33",
-		"TEST",
-		"PG 8.198",
-		"SLL-375",
-		"TCP-TEST",
-		"OSG 31.2"
+			"score_test_min=X,score_test=X"
 
 	};
 	private String[][] rules = {
@@ -106,11 +101,16 @@ public class CommandTester {
 //                    "This is ;:1(a ;:(1)):(test):;;:1(no test):!(test):;",
 //                    ""
 //            }
-		{
-			";>(?:.*TEST.*|TEST CASE)|(?:.+-(\\d+)|ID-\\2)|(?:.+ (\\d+)\\.(\\d+)|PGPH \\3\\.\\4)<;",
-			"New value is:  ;:(1)",
-			""
-		}
+//		{
+//			";>(?:.*TEST.*|TEST CASE)|(?:.+-(\\d+)|ID-\\2)|(?:.+ (\\d+)\\.(\\d+)|PGPH \\3\\.\\4)<;",
+//			"New value is:  ;:(1)",
+//			""
+//		}
+			{
+				"score_test_min=X,score_test=X",
+				";*(test,0)score_test_min=;+(test,0),score_test=;+(test,1)",
+				""
+			}
     };
 
 	public static void main(String[] args) {
@@ -122,11 +122,17 @@ public class CommandTester {
 
 		for (int num = 1; num <= 1; num++) {
 			System.out.println("--- RUN" + num + " ---");
+
+			List<InterpretedPattern> patterns = new ArrayList<>();
+			for (String[] rule : rules) {
+				patterns.add(new InterpretedPattern(rule[0], rule[1], rule[2]).compile());
+			}
+			Map<String,Integer> counters = Statics.initCounters(patterns);
+
 			for (int i = 0; i < commands.length; i++) {
 				System.out.println(commands[i]);
-				for (String[] rule : rules) {
-					InterpretedPattern ip = new InterpretedPattern(rule[0], rule[1], rule[2]).compile();
-					Notification notification = Statics.notify(Statics.changeCommand(ip, commands[i]));
+				for (InterpretedPattern ip : patterns) {
+					Notification notification = Statics.notify(Statics.changeCommand(ip, commands[i], counters));
 					for (NotificationEntry entry : notification.entries)
 						System.out.println("Command " + i + " notifies: " + entry.message + "; at -> " + entry.normalText);
 					result = notification.command;

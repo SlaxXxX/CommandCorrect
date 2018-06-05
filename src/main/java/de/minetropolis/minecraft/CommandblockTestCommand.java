@@ -41,7 +41,7 @@ public class CommandblockTestCommand implements CommandExecutor {
 			args[3] = "";
 		case 4:
 			InterpretedPattern ip = new InterpretedPattern(args[1], args[2], args[3]).compile();
-			Notification notification = Statics.notify(Statics.changeCommand(ip, args[0]));
+			Notification notification = Statics.notify(Statics.changeCommand(ip, args[0], null));
 			notification.entries.forEach(entry -> plugin.messenger.message("command notifies: " + entry.message + ", at: " + entry.colorText));
 			plugin.messenger.message("Result would be: " + notification.command);
 			break;

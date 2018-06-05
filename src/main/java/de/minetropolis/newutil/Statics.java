@@ -6,11 +6,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -129,7 +125,20 @@ public class Statics {
 		return sb.toString();
 	}
 
-	public static String changeCommand(InterpretedPattern ip, String command) {
+	public static Map<String, Integer> initCounters(List<InterpretedPattern> patterns) {
+		Map<String, Integer> counters = new HashMap<>();
+		for (InterpretedPattern ip : patterns) {
+			Matcher matcher = Pattern.compile(";\\*\\((\\w+),(-?\\d+)\\)").matcher(ip.target);
+			while (matcher.find()) {
+				if (!counters.containsKey(matcher.group(1)))
+					counters.put(matcher.group(1), Integer.parseInt(matcher.group(2)));
+				ip.target = ip.target.replace(matcher.group(), "");
+			}
+		}
+		return counters;
+	}
+
+	public static String changeCommand(InterpretedPattern ip, String command, Map<String, Integer> counters) {
 		if (!ip.assertion.isEmpty()) {
 			if (Pattern.compile(ip.assertion).matcher(command).find())
 				return command;
@@ -145,10 +154,23 @@ public class Statics {
 			command = command.substring(0, matcher.start()) + ip.target + 
 				(matcher.end() < command.length() ? command.substring(matcher.end()) : "");
 
+			if (counters != null)
+				command = applyCounters(command, counters);
 			command = applyGroups(command, matcher, ip.groups);
 			command = applyDisplayGroup(command, matcher);
 		}
 
+		return command;
+	}
+
+	private static String applyCounters(String command, Map<String, Integer> counters) {
+		Matcher matcher = Pattern.compile(";\\+\\((\\w+),(-?\\d+)\\)").matcher(command);
+		while (matcher.find()) {
+			if (counters.containsKey(matcher.group(1))) {
+				command = command.replace(matcher.group(), "" + counters.get(matcher.group(1)));
+				counters.replace(matcher.group(1), counters.get(matcher.group(1)) + Integer.parseInt(matcher.group(2)));
+			}
+		}
 		return command;
 	}
 

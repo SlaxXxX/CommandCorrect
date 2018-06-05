@@ -17,7 +17,7 @@ public class InterpretedPattern {
 		{
 			put(";?(", ")");
 			put(";>(", ")<;");
-		};
+		}
 	};
 
 	public List<Group> groups = new ArrayList<>();

@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import de.minetropolis.newutil.Statics;
+import org.bukkit.util.Vector;
 
 import java.util.*;
 
@@ -39,7 +40,8 @@ public class CommandblockFindCommand implements CommandExecutor {
 		if (args == null || args.length != 2)
 			return false;
 
-		Location[] bounds = plugin.getBounds(args[0], sender);
+		Vector[] vectors = {new Vector(1,0,0),new Vector(0,0,1),new Vector(0,1,0)};
+		Location[] bounds = plugin.getBounds(args[0], vectors, sender);
 		final String pattern = args[1];
 
 		if (bounds[0] == null || bounds[1] == null)

@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.minetropolis.newutil.InterpretedPattern;
@@ -60,11 +61,12 @@ public class DedicatedCorrector {
 
     private String getNewContent(List<String> lines, List<InterpretedPattern> list) {
         List<String> returnString = new ArrayList<>();
+        Map<String,Integer> counters = Statics.initCounters(list);
         for (int i = 0; i < lines.size(); i++) {
             String newline = lines.get(i);
             final int finalI = i;
             for (InterpretedPattern ip : list) {
-                Notification notification = Statics.notify(Statics.changeCommand(ip, newline));
+                Notification notification = Statics.notify(Statics.changeCommand(ip, newline, counters));
                 notification.entries.forEach(notif -> System.out.println("Line " + finalI + " notifies: " + notif.message + ", at: " + notif.normalText));
                 newline = notification.command;
                 newline = newline.replaceAll(";\\\\|\n", System.lineSeparator());
