@@ -39,15 +39,13 @@ public class CommandblockFindCommand implements CommandExecutor {
 		if (args == null || args.length != 2)
 			return false;
 
-		Location min, max;
-		min = plugin.getBound(-1, args[0], sender);
-		max = plugin.getBound(1, args[0], sender);
+		Location[] bounds = plugin.getBounds(args[0], sender);
 		final String pattern = args[1];
 
-		if (min == null || max == null)
+		if (bounds[0] == null || bounds[1] == null)
 			return false;
 
-		Set<Location> locations = findCommandblocks(min, max, pattern);
+		Set<Location> locations = findCommandblocks(bounds[0], bounds[1], pattern);
 
 		if (locations.size() > 0) {
 			if (sender instanceof Player) {

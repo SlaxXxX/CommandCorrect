@@ -56,11 +56,9 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		args = Statics.process(args);
 
 		final List<InterpretedPattern> changeRules;
-		Location min, max;
-		min = plugin.getBound(-1, args[0], sender);
-		max = plugin.getBound(1, args[0], sender);
+		Location[] bounds = plugin.getBounds(args[0], sender);
 
-		if (min == null || max == null)
+		if (bounds[0] == null || bounds[1] == null)
 			return false;
 
 		switch (args.length) {
@@ -77,7 +75,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 			return false;
 		}
 
-		correctCommandblocks(min, max, changeRules);
+		correctCommandblocks(bounds[0], bounds[1], changeRules);
 
 		return true;
 	}
@@ -109,7 +107,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 						Set<String> blockChanges = correctCommandblock((CommandBlock) commandBlock, changeRules, correction);
 						blocksChanges += blockChanges.size();
 						if (blockChanges.size() != 0)
-							blocksModified ++;
+							blocksModified++;
 					}
 				}
 			}
@@ -137,15 +135,15 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		}
 		if (!changed.equals(command)) {
 			commandBlock.setCommand(changed);
+			if (commandBlock.update(true, false)) {
+				correction.add(commandBlock.getLocation(), plugin.getCBDataString(commandBlock), command, changed);
+				return Collections.unmodifiableSet(changes);
+			} else {
+				plugin.messenger.message("Couldn't modify commandblock at:" + Statics.locationToString(commandBlock.getLocation()), null, "tp @p" + Statics.locationToString(commandBlock.getLocation()));
+				plugin.getLogger().log(Level.WARNING, "Couldn't modify commandblock at {0}", commandBlock.getLocation());
+			}
 		}
-		if (commandBlock.update(true, false)) {
-			correction.add(commandBlock.getLocation(), plugin.getCBDataString(commandBlock), command, changed);
-			return Collections.unmodifiableSet(changes);
-		} else {
-			plugin.messenger.message("Couldn't modify commandblock at:" + Statics.locationToString(commandBlock.getLocation()), null, "tp @p" + Statics.locationToString(commandBlock.getLocation()));
-			plugin.getLogger().log(Level.WARNING, "Couldn't modify commandblock at {0}", commandBlock.getLocation());
-			return Collections.emptySet();
-		}
+		return Collections.emptySet();
 	}
 
 }
