@@ -127,7 +127,7 @@ public class CommandTester {
 			for (String[] rule : rules) {
 				patterns.add(new InterpretedPattern(rule[0], rule[1], rule[2]).compile());
 			}
-			Map<String,Integer> counters = Statics.initCounters(patterns);
+			Map<String,Double> counters = Statics.initCounters(patterns);
 
 			for (int i = 0; i < commands.length; i++) {
 				System.out.println(commands[i]);

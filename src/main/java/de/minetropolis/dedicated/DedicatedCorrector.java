@@ -61,7 +61,7 @@ public class DedicatedCorrector {
 
     private String getNewContent(List<String> lines, List<InterpretedPattern> list) {
         List<String> returnString = new ArrayList<>();
-        Map<String,Integer> counters = Statics.initCounters(list);
+        Map<String,Double> counters = Statics.initCounters(list);
         for (int i = 0; i < lines.size(); i++) {
             String newline = lines.get(i);
             final int finalI = i;

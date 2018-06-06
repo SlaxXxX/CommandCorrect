@@ -137,7 +137,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
         int blocksFound = 0;
         int blocksChanges = 0;
         int blocksModified = 0;
-        Map<String, Integer> counters = Statics.initCounters(changeRules);
+        Map<String, Double> counters = Statics.initCounters(changeRules);
         Correction correction = plugin.corrections.makeNew();
         Location current = start.clone();
 
@@ -145,7 +145,6 @@ public class CommandblockCorrectCommand implements CommandExecutor {
             while(locationSmaller(current, end, vectors[1])) {
                 while(locationSmaller(current, end, vectors[0])) {
                     BlockState commandBlock = current.getBlock().getState();
-                    plugin.messenger.message("Block:" + Statics.locationToString(current));
                     if (commandBlock instanceof CommandBlock) {
                         blocksFound++;
                         Set<String> blockChanges = correctCommandblock((CommandBlock) commandBlock, changeRules, correction, counters);
@@ -182,7 +181,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
     }
 
     private Set<String> correctCommandblock(CommandBlock commandBlock, List<InterpretedPattern> changeRules,
-                                            Correction correction, Map<String, Integer> counters) {
+                                            Correction correction, Map<String, Double> counters) {
         Set<String> changes = new HashSet<>();
         String command = commandBlock.getCommand();
         String changed = command;

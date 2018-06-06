@@ -125,20 +125,28 @@ public class Statics {
 		return sb.toString();
 	}
 
-	public static Map<String, Integer> initCounters(List<InterpretedPattern> patterns) {
-		Map<String, Integer> counters = new HashMap<>();
+	public static Map<String, Double> initCounters(List<InterpretedPattern> patterns) {
+		Map<String, Double> counters = new HashMap<>();
 		for (InterpretedPattern ip : patterns) {
-			Matcher matcher = Pattern.compile(";\\*\\((\\w+),(-?\\d+)\\)").matcher(ip.target);
+			Matcher matcher = Pattern.compile(";\\*\\((\\w+),((?:-?\\d+(?:\\.\\d+)?)|(?:\\d+\\/\\d+))\\)").matcher(ip.target);
 			while (matcher.find()) {
 				if (!counters.containsKey(matcher.group(1)))
-					counters.put(matcher.group(1), Integer.parseInt(matcher.group(2)));
+					counters.put(matcher.group(1), parseDouble(matcher.group(2)));
 				ip.target = ip.target.replace(matcher.group(), "");
 			}
 		}
 		return counters;
 	}
+	
+	public static double parseDouble(String str) {
+		String[] fraction = str.split("\\/");
+		if (fraction.length == 2)
+			return Double.parseDouble(fraction[0]) / Double.parseDouble(fraction[1]);
+		else
+			return Double.parseDouble(str);
+	}
 
-	public static String changeCommand(InterpretedPattern ip, String command, Map<String, Integer> counters) {
+	public static String changeCommand(InterpretedPattern ip, String command, Map<String, Double> counters) {
 		if (!ip.assertion.isEmpty()) {
 			if (Pattern.compile(ip.assertion).matcher(command).find())
 				return command;
@@ -163,12 +171,12 @@ public class Statics {
 		return command;
 	}
 
-	private static String applyCounters(String command, Map<String, Integer> counters) {
-		Matcher matcher = Pattern.compile(";\\+\\((\\w+),(-?\\d+)\\)").matcher(command);
+	private static String applyCounters(String command, Map<String, Double> counters) {
+		Matcher matcher = Pattern.compile(";\\+\\((\\w+),((?:-?\\d+(?:\\.\\d+)?)|(?:\\d+\\/\\d+))\\)").matcher(command);
 		while (matcher.find()) {
 			if (counters.containsKey(matcher.group(1))) {
-				command = command.replace(matcher.group(), "" + counters.get(matcher.group(1)));
-				counters.replace(matcher.group(1), counters.get(matcher.group(1)) + Integer.parseInt(matcher.group(2)));
+				command = command.replace(matcher.group(), "" + (int)(double)counters.get(matcher.group(1)));
+				counters.replace(matcher.group(1), counters.get(matcher.group(1)) + parseDouble(matcher.group(2)));
 			}
 		}
 		return command;
