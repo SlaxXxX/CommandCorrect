@@ -44,7 +44,7 @@ public class CommandblockFindCommand implements CommandExecutor {
 		Location[] bounds = plugin.getBounds(args[0], vectors, sender);
 		final String pattern = args[1];
 
-		if (bounds[0] == null || bounds[1] == null)
+		if (bounds == null)
 			return false;
 
 		Set<Location> locations = findCommandblocks(bounds[0], bounds[1], pattern);

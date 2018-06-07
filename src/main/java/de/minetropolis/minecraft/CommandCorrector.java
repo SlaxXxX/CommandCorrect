@@ -96,7 +96,8 @@ public class CommandCorrector extends JavaPlugin {
                 Selection selection = worldedit.getSelection((Player) sender);
                 bounds[0] = selection.getMinimumPoint();
                 bounds[1] = selection.getMaximumPoint();
-            }
+            } else
+            	return null;
         } else {
             Location origin = Statics.getLocation(sender);
             if (origin != null) {
@@ -105,7 +106,7 @@ public class CommandCorrector extends JavaPlugin {
                 try {
                     radius = Math.abs(Integer.parseInt(range));
                 } catch (NumberFormatException | NullPointerException ex) {
-                    return bounds;
+                    return null;
                 }
 
                 bounds[0] = new Location(origin.getWorld(), origin.getBlockX() - radius,
