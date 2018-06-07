@@ -74,6 +74,8 @@ public class CommandCorrector extends JavaPlugin {
         getCommand("commandblockcorrecttest").setExecutor(testCommand);
         getCommand("commandblockcorrectundo").setExecutor(undoCommand);
         getCommand("commandblockcorrectorconfigreload").setExecutor(new ReloadConfigCommand(this));
+        
+        getLogger().log(Level.INFO, "CommmandCorrector enabled. " + (worldedit == null?"No ":"") + "Worldedit found!");
     }
 
     @Override
@@ -149,7 +151,7 @@ public class CommandCorrector extends JavaPlugin {
     }
 
     private boolean assertSelection(CommandSender sender) {
-        if (worldedit == null) {
+        if (worldedit != null) {
             if (sender instanceof Player) {
                 if (worldedit.getSelection((Player) sender) != null) {
                     return true;
