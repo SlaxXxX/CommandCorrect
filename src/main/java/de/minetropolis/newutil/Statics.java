@@ -128,7 +128,7 @@ public class Statics {
 	public static Map<String, Double> initCounters(List<InterpretedPattern> patterns) {
 		Map<String, Double> counters = new HashMap<>();
 		for (InterpretedPattern ip : patterns) {
-			Matcher matcher = Pattern.compile(";\\*\\((\\w+),((?:-?\\d+(?:\\.\\d+)?)|(?:\\d+\\/\\d+))\\)").matcher(ip.target);
+			Matcher matcher = Pattern.compile(";\\*\\(([;\\w]+),((?:-?\\d+(?:\\.\\d+)?)|(?:-?\\d+\\/\\d+))\\)").matcher(ip.target);
 			while (matcher.find()) {
 				if (!counters.containsKey(matcher.group(1)))
 					counters.put(matcher.group(1), parseDouble(matcher.group(2)));
@@ -137,7 +137,7 @@ public class Statics {
 		}
 		return counters;
 	}
-	
+
 	public static double parseDouble(String str) {
 		String[] fraction = str.split("\\/");
 		if (fraction.length == 2)
@@ -159,7 +159,7 @@ public class Statics {
 				if (Pattern.compile(ip.assertion.substring(2)).matcher(matcher.group()).find())
 					continue;
 			}
-			command = command.substring(0, matcher.start()) + ip.target + 
+			command = command.substring(0, matcher.start()) + ip.target +
 				(matcher.end() < command.length() ? command.substring(matcher.end()) : "");
 
 			if (counters != null)
@@ -172,10 +172,14 @@ public class Statics {
 	}
 
 	private static String applyCounters(String command, Map<String, Double> counters) {
-		Matcher matcher = Pattern.compile(";\\+\\((\\w+),((?:-?\\d+(?:\\.\\d+)?)|(?:\\d+\\/\\d+))\\)").matcher(command);
+		Matcher matcher = Pattern.compile(";\\+\\(([;\\w]+),((?:-?\\d+(?:\\.\\d+)?)|(?:-?\\d+\\/\\d+))\\)").matcher(command);
 		while (matcher.find()) {
 			if (counters.containsKey(matcher.group(1))) {
-				command = command.replace(matcher.group(), "" + (int)(double)counters.get(matcher.group(1)));
+				double value = (double) counters.get(matcher.group(1));
+				if (matcher.group(1).startsWith("D;"))
+					command = command.replace(matcher.group(), "" + value);
+				else
+					command = command.replace(matcher.group(), "" + (int) value);
 				counters.replace(matcher.group(1), counters.get(matcher.group(1)) + parseDouble(matcher.group(2)));
 			}
 		}
