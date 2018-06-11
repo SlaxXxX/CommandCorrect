@@ -43,13 +43,13 @@ public class CorrectionProcess implements Runnable {
 		executor.collectFinished(id, newStrings);
 	}
 
-	public CorrectionProcess process(List<String> strings, String pattern, String target, String assertion) {
-		patterns = new ArrayList<>();
-		patterns.add(new InterpretedPattern(pattern, target, assertion).compile());
-		counters = new IPCounters(patterns).clone();
-		this.strings = strings;
-		return this;
-	}
+//	public CorrectionProcess process(List<String> strings, String pattern, String target, String assertion) {
+//		patterns = new ArrayList<>();
+//		patterns.add(new InterpretedPattern(pattern, target, assertion).compile());
+//		counters = new IPCounters(patterns).clone();
+//		this.strings = strings;
+//		return this;
+//	}
 	
 	public CorrectionProcess process(List<String> strings, InterpretedPattern ip) {
 		patterns = new ArrayList<>();
@@ -106,7 +106,7 @@ public class CorrectionProcess implements Runnable {
 		Matcher matcher = Pattern.compile(";\\+\\(([;\\w]+),((?:-?\\d+(?:\\.\\d+)?)|(?:-?\\d+\\/\\d+))\\)").matcher(command);
 		while (matcher.find()) {
 			if (counters.containsKey(matcher.group(1))) {
-				double value = (double) counters.get(matcher.group(1));
+				double value = counters.get(matcher.group(1));
 				if (matcher.group(1).startsWith("D;"))
 					command = command.replace(matcher.group(), "" + value);
 				else
@@ -183,7 +183,7 @@ public class CorrectionProcess implements Runnable {
 					.append(">!<").append(ChatColor.RESET).append(pattern.substring(positions.get(i),
 						Math.min(positions.get(i) + 20, pattern.length())))
 					.toString();
-			receiver.displayMessage(message);
+			receiver.sendMessage(message);
 		}
 		return pattern;
 	}

@@ -1,38 +1,36 @@
 package de.minetropolis.minecraft;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 
+import de.minetropolis.messages.MessageReceiver;
+import de.minetropolis.messages.PlayerReceiver;
+import de.minetropolis.process.Config;
+import de.minetropolis.process.CorrectionProcess;
+import de.minetropolis.process.InterpretedPattern;
+import de.minetropolis.process.ProcessExecutor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.block.CommandBlock;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 
-import de.minetropolis.newutil.Corrections;
-import de.minetropolis.newutil.Statics;
 import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.util.Vector;
 
-public class CommandCorrector extends JavaPlugin {
+public class CommandCorrector extends JavaPlugin implements ProcessExecutor {
 
     private CommandblockCorrectCommand correctorCommand;
     private CommandblockFindCommand findCommand;
     private CommandblockTestCommand testCommand;
     private CommandblockUndoCommand undoCommand;
-    Corrections corrections = new Corrections();
-    Messenger messenger = new Messenger();
     WorldEditPlugin worldedit;
 
     public static Map<String, String> abrvSwitch = new HashMap<String, String>() {
@@ -74,13 +72,13 @@ public class CommandCorrector extends JavaPlugin {
         getCommand("commandblockcorrecttest").setExecutor(testCommand);
         getCommand("commandblockcorrectundo").setExecutor(undoCommand);
         getCommand("commandblockcorrectorconfigreload").setExecutor(new ReloadConfigCommand(this));
-        
-        getLogger().log(Level.INFO, "CommmandCorrector enabled. " + (worldedit == null?"No ":"") + "Worldedit found!");
+
+        getLogger().log(Level.INFO, "CommmandCorrector enabled. " + (worldedit == null ? "No " : "") + "Worldedit found!");
     }
 
     @Override
     public void reloadConfig() {
-        correctorCommand.setDefaultChangeRules(Statics.loadConfig());
+        Config.loadConfig();
     }
 
     private WorldEditPlugin findWorldEdit() {
@@ -89,17 +87,17 @@ public class CommandCorrector extends JavaPlugin {
                 .filter(plugin -> plugin instanceof WorldEditPlugin).findFirst().orElse(null);
     }
 
-    Location[] getBounds(String range, Vector[] vectors, CommandSender sender) {
+    Location[] getBounds(String range, Vector[] vectors, PlayerReceiver receiver) {
         Location[] bounds = new Location[2];
         if (range.toLowerCase().equals("selection")) {
-            if (assertSelection(sender)) {
-                Selection selection = worldedit.getSelection((Player) sender);
+            if (assertSelection(receiver)) {
+                Selection selection = worldedit.getSelection(receiver.receiver);
                 bounds[0] = selection.getMinimumPoint();
                 bounds[1] = selection.getMaximumPoint();
             } else
-            	return null;
+                return null;
         } else {
-            Location origin = Statics.getLocation(sender);
+            Location origin = getLocation(receiver.receiver);
             if (origin != null) {
 
                 int radius;
@@ -151,19 +149,15 @@ public class CommandCorrector extends JavaPlugin {
             return bounds[1];
     }
 
-    private boolean assertSelection(CommandSender sender) {
+    private boolean assertSelection(PlayerReceiver receiver) {
         if (worldedit != null) {
-            if (sender instanceof Player) {
-                if (worldedit.getSelection((Player) sender) != null) {
+                if (worldedit.getSelection(receiver.receiver) != null) {
                     return true;
                 } else {
-                    messenger.message("You don't have a selection!");
+                    receiver.sendMessage("You don't have a selection!");
                 }
-            } else {
-                Bukkit.getLogger().log(Level.WARNING, "CommandSender can't use Worldedit selection parameter");
-            }
         } else {
-            messenger.message("No Worldedit plugin found. >click<",
+            receiver.sendMessage("No Worldedit plugin found. >click<",
                     HoverEvent.Action.SHOW_TEXT,
                     "Get World-Edit here!",
                     ClickEvent.Action.OPEN_URL,
@@ -178,46 +172,51 @@ public class CommandCorrector extends JavaPlugin {
         //commandBlock.getMetadata("").forEach(value -> messenger.message(value.asString()));
         return "";
     }
-}
 
-class Messenger {
-    private CommandSender receiver = null;
-
-    public void setReceiver(CommandSender r) {
-        receiver = r;
-    }
-
-    public CommandSender getReceiver() {
-        return receiver;
-    }
-
-    public void reset() {
-        receiver = null;
-    }
-
-    public boolean hasReceiver() {
-        return receiver != null;
-    }
-
-    public void message(String content) {
-        message(content, null, null, null, null);
-    }
-
-    public void message(String content, String hoverText, String command) {
-        message(content, HoverEvent.Action.SHOW_TEXT, hoverText, ClickEvent.Action.RUN_COMMAND, command);
-    }
-
-    public void message(String content, HoverEvent.Action hoverAction, String hoverText, ClickEvent.Action clickAction, String command) {
-        if (receiver instanceof Player) {
-            TextComponent message = new TextComponent(content);
-            if (hoverAction != null && hoverText != null)
-                message.setHoverEvent(
-                        new HoverEvent(hoverAction, new ComponentBuilder(hoverText).create()));
-            if (clickAction != null && command != null)
-                message.setClickEvent(new ClickEvent(clickAction, command));
-            receiver.spigot().sendMessage(message);
-            return;
+    public static Location getLocation(CommandSender sender) {
+        Location location = null;
+        if (sender instanceof Entity) {
+            location = ((Entity) sender).getLocation();
+        } else if (sender instanceof BlockCommandSender) {
+            location = ((BlockCommandSender) sender).getBlock().getLocation();
+        } else {
+            sender.sendMessage("This command is not supported for this sender.");
         }
-        Bukkit.getLogger().log(Level.WARNING, "Couldn't send message to " + receiver.getName());
+        return location;
+    }
+
+    public static String locationToString(Location location) {
+        return new StringBuilder(" ").append(location.getBlockX()).append(" ").append(location.getBlockY()).append(" ")
+                .append(location.getBlockZ()).toString();
+    }
+
+    public static String[] process(String[] args) {
+        ArrayList<String> processed = new ArrayList<>();
+
+        StringBuilder stringBuilder = new StringBuilder();
+        Arrays.asList(args).forEach(arg -> stringBuilder.append(arg).append(" "));
+
+        String commandArgs = stringBuilder.toString().trim();
+
+        String[] splitArgs = commandArgs.split(";/");
+        processed.addAll(Arrays.asList(splitArgs[0].trim().split(" ")));
+        for (int i = 1; i < splitArgs.length; i++)
+            processed.add(splitArgs[i].trim());
+        if (Objects.equals(processed.get(0), ""))
+            processed.remove(0);
+
+        return processed.toArray(new String[0]);
+    }
+
+    public void startProcess(List<String> strings, List<InterpretedPattern> patterns, MessageReceiver receiver) {
+        if (patterns != null)
+            new Thread(new CorrectionProcess(this, receiver, "TODO").process(strings, patterns)).start();
+        else
+            new Thread(new CorrectionProcess(this, receiver, "TODO").process(strings)).start();
+    }
+
+    @Override
+    public void collectFinished(String id, List<String> strings) {
+
     }
 }

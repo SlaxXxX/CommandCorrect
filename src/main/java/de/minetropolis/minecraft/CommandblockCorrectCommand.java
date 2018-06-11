@@ -1,8 +1,9 @@
 package de.minetropolis.minecraft;
 
 import java.util.*;
-import java.util.logging.Level;
 
+import de.minetropolis.messages.PlayerReceiver;
+import de.minetropolis.process.Config;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
@@ -10,15 +11,14 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
-import de.minetropolis.newutil.InterpretedPattern;
-import de.minetropolis.newutil.Notification;
-import de.minetropolis.newutil.Statics;
-import de.minetropolis.newutil.Corrections.Correction;
+import de.minetropolis.process.InterpretedPattern;
+import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public class CommandblockCorrectCommand implements CommandExecutor {
 
 	private final CommandCorrector plugin;
+	private PlayerReceiver receiver;
 	private List<InterpretedPattern> defaultChangeRules = Collections.emptyList();
 
 	private Map<Character, Vector> directionToVector = new HashMap<Character, Vector>() {
@@ -38,30 +38,25 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		this.plugin = plugin;
 	}
 
-	public void setDefaultChangeRules(List<InterpretedPattern> changes) {
-		this.defaultChangeRules = new ArrayList<>(Objects.requireNonNull(changes));
-	}
-
-	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		plugin.messenger.setReceiver(sender);
-		boolean result = doCommand(sender, command, label, args);
-		plugin.messenger.reset();
-		return result;
-	}
-
-	public boolean doCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (!sender.hasPermission("commandcorrect.apply")) {
-			sender.sendMessage("You don't have the required Permissions!");
-			return true;
-		}
+	    if (sender instanceof Player) {
+            receiver = new PlayerReceiver();
+            receiver.receiver = (Player)sender;
+        } else {
+	        sender.sendMessage("This sender is not supported for this command. Only players can use it!");
+            return true;
+	    }
+        if (!sender.hasPermission("commandcorrect.apply")) {
+            sender.sendMessage("You don't have the required Permissions!");
+            return true;
+        }
 
 		if (args == null || args.length == 0)
 			return false;
 
-		args = Statics.process(args);
+		args = plugin.process(args);
 
-		Vector[] vectorPriorities = new Vector[3];
+		Vector[] vectorPriorities;
 
 		String[] prioSplit = args[0].split(";");
 		if (prioSplit.length > 1) {
@@ -70,27 +65,28 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		} else
 			vectorPriorities = getPreferredPriorities("");
 
-		final List<InterpretedPattern> changeRules;
-		Location[] bounds = plugin.getBounds(args[0], vectorPriorities, sender);
+		List<InterpretedPattern> patterns = null;
+		Location[] bounds = plugin.getBounds(args[0], vectorPriorities, receiver);
 
-		if (bounds == null)
-			return false;
+		if (bounds == null) {
+            return true;
+        }
 
 		switch (args.length) {
 		case 1:
-			changeRules = getChangeRule(null, null, null);
 			break;
 		case 3:
 			args = Arrays.copyOf(args, 4);
 			args[3] = "";
 		case 4:
-			changeRules = getChangeRule(args[1], args[2], args[3]);
+			patterns = new ArrayList<>();
+			patterns.add(new InterpretedPattern(args[1], args[2], args[3]).compile());
 			break;
 		default:
 			return false;
 		}
 
-		correctCommandblocks(bounds[0], bounds[1], vectorPriorities, changeRules);
+		correctCommandblocks(bounds[0], bounds[1], vectorPriorities, patterns);
 
 		return true;
 	}
@@ -103,7 +99,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		boolean z = false;
 		for (char c : prio.toCharArray()) {
 			if (!directionToVector.containsKey(Character.toUpperCase(c))) {
-				plugin.messenger.message(c + " is not a direction. Use N S W E U D. Using default directions.");
+				receiver.sendMessage(c + " is not a direction. Use N S W E U D. Using default directions.");
 				return getPreferredPriorities("");
 			}
 			if (Character.toUpperCase(c) == 'E' || Character.toUpperCase(c) == 'W') {
@@ -148,51 +144,37 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 	}
 	
 	private Vector[] sameAxisDoDefault(String axis) {
-		plugin.messenger.message("Can't use " + axis + "-Axis twice. Using default directions.");
-		return getPreferredPriorities("");
-	}
+        receiver.sendMessage("Can't use " + axis + "-Axis twice. Using default directions.");
+        return getPreferredPriorities("");
+    }
 
-	private List<InterpretedPattern> getChangeRule(String pattern, String target, String assertion) {
-		if (pattern != null && target != null && assertion != null && !pattern.isEmpty()) {
-			List<InterpretedPattern> changeRule = new ArrayList<>();
-			changeRule.add(new InterpretedPattern(pattern, target, assertion).compile());
-			return changeRule;
-		} else {
-			return Collections.unmodifiableList(defaultChangeRules);
-		}
-	}
-
-	private void correctCommandblocks(Location start, Location end, Vector[] vectors, List<InterpretedPattern> changeRules) {
+	private void correctCommandblocks(Location start, Location end, Vector[] vectors, List<InterpretedPattern> patterns) {
 		int blocksFound = 0;
 		int blocksChanges = 0;
 		int blocksModified = 0;
-		Map<String, Double> counters = Statics.initCounters(changeRules);
-		Correction correction = plugin.corrections.makeNew();
 		Location current = start.clone();
+		List<String> strings = new ArrayList<>();
 
 		while (locationSmaller(current, end, vectors[2])) {
-			while (locationSmaller(current, end, vectors[1])) {
-				while (locationSmaller(current, end, vectors[0])) {
-					BlockState commandBlock = current.getBlock().getState();
-					if (commandBlock instanceof CommandBlock) {
-						blocksFound++;
-						Set<String> blockChanges = correctCommandblock((CommandBlock) commandBlock, changeRules, correction, counters);
-						blocksChanges += blockChanges.size();
-						if (blockChanges.size() != 0)
-							blocksModified++;
-					}
-					current.add(vectors[0]);
-				}
-				resetLocation(current, start, vectors[0]);
-				current.add(vectors[1]);
-			}
-			resetLocation(current, start, vectors[1]);
-			current.add(vectors[2]);
-		}
-
-		plugin.getLogger().log(Level.INFO, "{0} has applied {1} modifications to {2} of {3} commandblocks!",
-			new Object[] { plugin.messenger.getReceiver().getName(), blocksChanges, blocksModified, blocksFound });
-		plugin.messenger.message(blocksModified + " / " + blocksFound + " commandblocks were modified with " + blocksChanges + " modifications. Undo with /ccu");
+            while (locationSmaller(current, end, vectors[1])) {
+                while (locationSmaller(current, end, vectors[0])) {
+                    BlockState commandBlock = current.getBlock().getState();
+                    if (commandBlock instanceof CommandBlock) {
+                        strings.add(((CommandBlock) commandBlock).getCommand());
+                    }
+                    current.add(vectors[0]);
+                }
+                resetLocation(current, start, vectors[0]);
+                current.add(vectors[1]);
+            }
+            resetLocation(current, start, vectors[1]);
+            current.add(vectors[2]);
+        }
+        if (strings.size() == 0) {
+		    receiver.sendMessage("No Commandblocks found.");
+		    return;
+        }
+        plugin.startProcess(strings, patterns, receiver);
 	}
 
 	private void resetLocation(Location current, Location start, Vector direction) {
@@ -206,35 +188,6 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 
 	private boolean locationSmaller(Location start, Location end, Vector vec) {
 		return start.getX() * vec.getX() + start.getY() * vec.getY() + start.getZ() * vec.getZ() <= end.getX() * vec.getX() + end.getY() * vec.getY() + end.getZ() * vec.getZ();
-	}
-
-	private Set<String> correctCommandblock(CommandBlock commandBlock, List<InterpretedPattern> changeRules,
-		Correction correction, Map<String, Double> counters) {
-		Set<String> changes = new HashSet<>();
-		String command = commandBlock.getCommand();
-		String changed = command;
-		for (InterpretedPattern ip : changeRules) {
-			String unchanged = changed;
-			Notification notification = Statics.notify(Statics.changeCommand(ip, changed, counters));
-			notification.entries.forEach(entry -> plugin.messenger.message("CommandBlock at" + Statics.locationToString(commandBlock.getLocation()) + " notifies: " + entry.message,
-				entry.colorText, "/tp @p" + Statics.locationToString(commandBlock.getLocation())));
-
-			changed = notification.command;
-
-			if (!changed.equals(unchanged))
-				changes.add(ip.pattern);
-		}
-		if (!changed.equals(command)) {
-			commandBlock.setCommand(changed);
-			if (commandBlock.update(true, false)) {
-				correction.add(commandBlock.getLocation(), plugin.getCBDataString(commandBlock), command, changed);
-				return Collections.unmodifiableSet(changes);
-			} else {
-				plugin.messenger.message("Couldn't modify commandblock at:" + Statics.locationToString(commandBlock.getLocation()), null, "tp @p" + Statics.locationToString(commandBlock.getLocation()));
-				plugin.getLogger().log(Level.WARNING, "Couldn't modify commandblock at {0}", commandBlock.getLocation());
-			}
-		}
-		return Collections.emptySet();
 	}
 
 }

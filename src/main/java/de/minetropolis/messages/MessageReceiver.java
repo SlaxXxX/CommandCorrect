@@ -4,14 +4,14 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.HoverEvent;
 
 public abstract class MessageReceiver {
-	public abstract void displayMessage(String message);
+	public abstract void sendMessage(String message);
 	
-	public void displayMessage(String message, String hoverMessage, String command) {
-		displayMessage(message);
+	public void sendMessage(String message, String hoverMessage, String command) {
+		sendMessage(message);
 	}
 	
-	public void displayMessage(String message, HoverEvent.Action hoverAction, String hoverMessage, ClickEvent.Action clickAction, String clickMessage) {
-		displayMessage(message);
+	public void sendMessage(String message, HoverEvent.Action hoverAction, String hoverMessage, ClickEvent.Action clickAction, String clickMessage) {
+		sendMessage(message);
 	}
 	
 	protected String decolorize(String message) {

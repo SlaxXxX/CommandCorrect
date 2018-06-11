@@ -15,7 +15,7 @@ public class IPCounters {
 	public Map<String,Double> clone(){
 		Map<String,Double> clone = new HashMap<>();
 		for(Entry<String, Double> entry : counters.entrySet()) {
-			clone.put(entry.getKey(), (double)entry.getValue());
+			clone.put(entry.getKey(), entry.getValue());
 		}
 		return clone;
 	}
