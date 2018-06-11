@@ -66,7 +66,7 @@ public class InterpretedPattern {
 				return;
 			}
 			i = Math.min(special, autoconvert);
-			if (Statics.isEscaped(pattern, i)) {
+			if (isEscaped(pattern, i)) {
 				i -= removeSlashes(i) - 1;
 				continue;
 			}
@@ -112,13 +112,13 @@ public class InterpretedPattern {
 		List<List<Integer>> brackets = new ArrayList<>();
 		brackets.add(new ArrayList<>());
 		for (int i = 0; i < string.length(); i++) {
-			if (string.charAt(i) == '(' && !Statics.isEscaped(string, i)) {
+			if (string.charAt(i) == '(' && !isEscaped(string, i)) {
 				brackets.get(depth).add(i);
 				depth++;
 				if (depth > brackets.size() - 1)
 					brackets.add(new ArrayList<>());
 			}
-			if (string.charAt(i) == ')' && !Statics.isEscaped(string, i)) {
+			if (string.charAt(i) == ')' && !isEscaped(string, i)) {
 				depth--;
 				brackets.get(depth).add(i + 1);
 			}
@@ -172,10 +172,38 @@ public class InterpretedPattern {
 	}
 
 	private int removeSlashes(int pos) {
-		String removed = Statics.removeSlashes(pattern, pos);
+		String removed = removeSlashes(pattern, pos);
 		int i = pattern.length() - removed.length();
 		pattern = removed;
 		return i;
+	}
+	
+	private boolean isEscaped(String string, int pos) {
+		int slashCount = 0;
+		while (pos - (slashCount + 1) >= 0 && string.charAt(pos - (slashCount + 1)) == '\\')
+			slashCount++;
+		return slashCount % 2 == 1;
+	}
+
+	private String removeSlashes(String string, int pos) {
+
+		int slashCount = 1;
+		while (pos - slashCount > 0 && string.charAt(pos - slashCount) == '\\') {
+			if (slashCount % 2 == 1)
+				string = string.substring(0, pos - slashCount) + string.substring(pos - slashCount + 1);
+			slashCount++;
+		}
+		return string;
+	}
+
+	public String unescape(String string) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < string.length(); i++) {
+			if (string.charAt(i) == '\\')
+				i++;
+			sb.append(string.charAt(i));
+		}
+		return sb.toString();
 	}
 
 }

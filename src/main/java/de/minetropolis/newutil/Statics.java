@@ -97,34 +97,6 @@ public class Statics {
 		return list;
 	}
 
-	public static boolean isEscaped(String string, int pos) {
-		int slashCount = 0;
-		while (pos - (slashCount + 1) >= 0 && string.charAt(pos - (slashCount + 1)) == '\\')
-			slashCount++;
-		return slashCount % 2 == 1;
-	}
-
-	public static String removeSlashes(String string, int pos) {
-
-		int slashCount = 1;
-		while (pos - slashCount > 0 && string.charAt(pos - slashCount) == '\\') {
-			if (slashCount % 2 == 1)
-				string = string.substring(0, pos - slashCount) + string.substring(pos - slashCount + 1);
-			slashCount++;
-		}
-		return string;
-	}
-
-	public static String unescape(String string) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < string.length(); i++) {
-			if (string.charAt(i) == '\\')
-				i++;
-			sb.append(string.charAt(i));
-		}
-		return sb.toString();
-	}
-
 	public static Map<String, Double> initCounters(List<InterpretedPattern> patterns) {
 		Map<String, Double> counters = new HashMap<>();
 		for (InterpretedPattern ip : patterns) {
@@ -164,7 +136,7 @@ public class Statics {
 
 			if (counters != null)
 				command = applyCounters(command, counters);
-			command = applyGroups(command, matcher, ip.groups);
+			command = applyGroups(command, matcher, ip);
 			command = applyDisplayGroup(command, matcher);
 		}
 
@@ -186,8 +158,9 @@ public class Statics {
 		return command;
 	}
 
-	private static String applyGroups(String command, Matcher matcher, List<Group> groups) {
+	private static String applyGroups(String command, Matcher matcher, InterpretedPattern ip) {
 		int i = 0;
+		List<Group> groups = ip.groups;
 		for (Group group : groups.stream().filter(group -> group.getType() == GroupType.NORMAL ||
 			group.getType() == GroupType.SPECIAL ||
 			group.getType() == GroupType.AUTOCONVERT).collect(Collectors.toList())) {
@@ -198,7 +171,7 @@ public class Statics {
 				String[] conversions = group.getContent().substring(4, group.getContent().length() - 2).split("\\)\\|\\(\\?:");
 				final int index = i;
 				String match = Arrays.asList(conversions).stream().filter(conversion -> Pattern.matches(conversion, matcher.group(index))).findFirst().orElse("");
-				command = command.replace(";:(" + i + ")", unescape(replaceGroupReferences(match.split("\\|")[match.split("\\|").length - 1], matcher)));
+				command = command.replace(";:(" + i + ")", ip.unescape(replaceGroupReferences(match.split("\\|")[match.split("\\|").length - 1], matcher)));
 			}
 		}
 		return command;

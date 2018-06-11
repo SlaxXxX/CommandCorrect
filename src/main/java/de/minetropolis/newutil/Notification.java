@@ -10,7 +10,7 @@ public class Notification {
 	public Notification(String cmd) {
 		command = cmd;
 	}
-	void add(String color, String normal, String msg){
+	public void add(String color, String normal, String msg){
 		entries.add(new NotificationEntry(color, normal, msg));
 	}
 }
