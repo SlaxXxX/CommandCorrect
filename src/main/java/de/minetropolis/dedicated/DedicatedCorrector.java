@@ -9,8 +9,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import process.CorrectionProcess;
-import process.ProcessExecutor;
+import de.minetropolis.messages.ConsoleReceiver;
+import de.minetropolis.process.Config;
+import de.minetropolis.process.CorrectionProcess;
+import de.minetropolis.process.ProcessExecutor;
 
 public class DedicatedCorrector implements ProcessExecutor {
 	static private boolean appendLines = false;
@@ -31,6 +33,7 @@ public class DedicatedCorrector implements ProcessExecutor {
 	}
 
 	private DedicatedCorrector() {
+		Config.loadConfig();
 		try {
 			folder = new File(new File(getClass().getProtectionDomain().getCodeSource().getLocation().toURI()).getParentFile().toURI().getPath(), "CommandCorrector");
 			content = new File(folder.toURI().getPath(), "Dedicated").listFiles();
@@ -56,7 +59,7 @@ public class DedicatedCorrector implements ProcessExecutor {
 			if (appendLines)
 				fillLines = Arrays.asList(fillLines.stream().collect(Collectors.joining("\n")));
 			if (fillLines.size() > 0) {
-				myProcess = new CorrectionProcess(this, file.getName());
+				myProcess = new CorrectionProcess(this, new ConsoleReceiver(), file.getName());
 				new Thread(myProcess.process(fillLines)).start();
 			}
 		}

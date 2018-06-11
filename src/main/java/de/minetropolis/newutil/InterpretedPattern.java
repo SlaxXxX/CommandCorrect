@@ -49,7 +49,6 @@ public class InterpretedPattern {
 			e.printStackTrace();
 			return null;
 		}
-
 		buildPattern();
 		return this;
 	}
@@ -177,7 +176,7 @@ public class InterpretedPattern {
 		pattern = removed;
 		return i;
 	}
-	
+
 	private boolean isEscaped(String string, int pos) {
 		int slashCount = 0;
 		while (pos - (slashCount + 1) >= 0 && string.charAt(pos - (slashCount + 1)) == '\\')

@@ -74,7 +74,7 @@
 				</configuration>
 			</plugin>
 		</plugins>
-		<defaultGoal>clean install</defaultGoal>
+		<defaultGoal>install</defaultGoal>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>

@@ -1,4 +1,4 @@
-package process;
+package de.minetropolis.process;
 
 import java.util.List;
 
