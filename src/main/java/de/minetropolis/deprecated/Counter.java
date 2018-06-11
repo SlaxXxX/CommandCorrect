@@ -1,4 +1,4 @@
-package de.minetropolis.newutil;
+package de.minetropolis.deprecated;
 
 public class Counter {
 	int start;

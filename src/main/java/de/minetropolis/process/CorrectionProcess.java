@@ -13,7 +13,7 @@ import org.bukkit.ChatColor;
 import de.minetropolis.groups.Group;
 import de.minetropolis.groups.GroupType;
 import de.minetropolis.messages.MessageReceiver;
-import de.minetropolis.newutil.InterpretedPattern;
+import de.minetropolis.process.InterpretedPattern;
 
 public class CorrectionProcess implements Runnable {
 
@@ -50,6 +50,22 @@ public class CorrectionProcess implements Runnable {
 		this.strings = strings;
 		return this;
 	}
+	
+	public CorrectionProcess process(List<String> strings, InterpretedPattern ip) {
+		patterns = new ArrayList<>();
+		patterns.add(ip);
+		counters = new IPCounters(patterns).clone();
+		this.strings = strings;
+		return this;
+	}
+	
+	public CorrectionProcess process(List<String> strings, List<InterpretedPattern> ip) {
+		patterns = new ArrayList<>();
+		patterns.addAll(ip);
+		counters = new IPCounters(patterns).clone();
+		this.strings = strings;
+		return this;
+	}
 
 	public CorrectionProcess process(List<String> strings) {
 		this.strings = strings;
@@ -69,7 +85,7 @@ public class CorrectionProcess implements Runnable {
 
 		while (matcher.find()) {
 			if (ip.assertion.startsWith("L;")) {
-				if (!Pattern.compile(ip.assertion.substring(2)).matcher(matcher.group()).find())
+				if (Pattern.compile(ip.assertion.substring(2)).matcher(matcher.group()).find())
 					continue;
 			}
 			int length = string.length();

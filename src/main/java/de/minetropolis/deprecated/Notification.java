@@ -1,4 +1,4 @@
-package de.minetropolis.newutil;
+package de.minetropolis.deprecated;
 
 import java.util.ArrayList;
 import java.util.List;

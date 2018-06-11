@@ -1,4 +1,4 @@
-package de.minetropolis.newutil;
+package de.minetropolis.deprecated;
 
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +19,7 @@ import org.bukkit.entity.Entity;
 
 import de.minetropolis.groups.Group;
 import de.minetropolis.groups.GroupType;
+import de.minetropolis.process.InterpretedPattern;
 
 public class Statics {
 

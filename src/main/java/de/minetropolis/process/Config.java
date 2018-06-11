@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.minetropolis.newutil.InterpretedPattern;
-import de.minetropolis.newutil.Statics;
+import de.minetropolis.process.InterpretedPattern;
 
 public class Config {
 	
@@ -22,7 +21,7 @@ public class Config {
 	public static void loadConfig() {
 		File jar = null;
 		try {
-			jar = new File(Statics.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+			jar = new File(Config.class.getProtectionDomain().getCodeSource().getLocation().toURI());
 		} catch (URISyntaxException e1) {
 			e1.printStackTrace();
 		}
@@ -32,7 +31,7 @@ public class Config {
 			config.getParentFile().mkdirs();
 			new File(config.getParent(), "Dedicated").mkdir();
 			try {
-				Files.copy(Statics.class.getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
+				Files.copy(Config.class.getResourceAsStream("/config.yml"), Paths.get(config.toURI()), StandardCopyOption.REPLACE_EXISTING);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

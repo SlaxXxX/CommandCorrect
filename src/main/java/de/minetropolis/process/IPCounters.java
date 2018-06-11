@@ -7,7 +7,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import de.minetropolis.newutil.InterpretedPattern;
+import de.minetropolis.process.InterpretedPattern;
 
 public class IPCounters {
 	private Map<String,Double> counters = new HashMap<>();
