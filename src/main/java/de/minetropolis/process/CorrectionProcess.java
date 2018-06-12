@@ -17,13 +17,13 @@ import de.minetropolis.process.InterpretedPattern;
 
 public class CorrectionProcess implements Runnable {
 
-	List<InterpretedPattern> patterns;
-	Map<String,Double> counters;
-	List<String> strings;
-	List<String> newStrings = new ArrayList<>();
-	ProcessExecutor executor;
-	MessageReceiver receiver;
-	String id;
+	private List<InterpretedPattern> patterns;
+	private Map<String,Double> counters;
+	public List<String> strings;
+	private List<String> newStrings = new ArrayList<>();
+	private ProcessExecutor executor;
+	private MessageReceiver receiver;
+	private String id;
 
 	public CorrectionProcess(ProcessExecutor exec, MessageReceiver rec, String id) {
 		this.id = id;
@@ -42,14 +42,6 @@ public class CorrectionProcess implements Runnable {
 		}
 		executor.collectFinished(id, newStrings);
 	}
-
-//	public CorrectionProcess process(List<String> strings, String pattern, String target, String assertion) {
-//		patterns = new ArrayList<>();
-//		patterns.add(new InterpretedPattern(pattern, target, assertion).compile());
-//		counters = new IPCounters(patterns).clone();
-//		this.strings = strings;
-//		return this;
-//	}
 	
 	public CorrectionProcess process(List<String> strings, InterpretedPattern ip) {
 		patterns = new ArrayList<>();
@@ -189,3 +181,4 @@ public class CorrectionProcess implements Runnable {
 	}
 	
 }
+

@@ -32,3 +32,8 @@ commands:
     usage: /<command> [<"force">]
     permission: commandcorrect.undo
     aliases: [commandcorrectundo, ccu, cbcu]
+  commandblockcorrectinfo:
+    description: 'Get information about.. stuff.'
+    usage: /<command>
+    permission: commandcorrect.info
+    aliases: [commandcorrectinfo, cci, cbci]

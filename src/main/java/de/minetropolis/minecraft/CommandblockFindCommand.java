@@ -3,13 +3,12 @@ package de.minetropolis.minecraft;
 import org.bukkit.Location;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.CommandBlock;
-import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-import de.minetropolis.newutil.Statics;
+import de.minetropolis.messages.PlayerReceiver;
 import org.bukkit.util.Vector;
 
 import java.util.*;
@@ -17,6 +16,7 @@ import java.util.*;
 public class CommandblockFindCommand implements CommandExecutor {
 
 	private final CommandCorrector plugin;
+	private PlayerReceiver receiver;
 
 	public CommandblockFindCommand(CommandCorrector plugin) {
 		this.plugin = Objects.requireNonNull(plugin);
@@ -24,45 +24,40 @@ public class CommandblockFindCommand implements CommandExecutor {
 
 	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		plugin.messenger.setReceiver(sender);
-		boolean result = doCommand(sender, command, label, args);
-		plugin.messenger.reset();
-		return result;
-	}
-
-	public boolean doCommand(CommandSender sender, Command command, String label, String[] args) {
+		if (sender instanceof Player) {
+			receiver = new PlayerReceiver();
+			receiver.receiver = (Player) sender;
+		} else {
+			sender.sendMessage("This sender is not supported for this command. Only players can use it!");
+			return true;
+		}
 		if (!sender.hasPermission("commandcorrect.find")) {
 			sender.sendMessage("You don't have the required Permissions!");
 			return true;
 		}
 
-		args = Statics.process(args);
+		args = CommandCorrector.process(args);
 		if (args == null || args.length != 2)
 			return false;
 
-		Vector[] vectors = {new Vector(1,0,0),new Vector(0,0,1),new Vector(0,1,0)};
-		Location[] bounds = plugin.getBounds(args[0], vectors, sender);
+		Vector[] vectors = { new Vector(1, 0, 0), new Vector(0, 0, 1), new Vector(0, 1, 0) };
+		Location[] bounds = plugin.getBounds(args[0], vectors, receiver);
 		final String pattern = args[1];
 
 		if (bounds == null)
-			return false;
+			return true;
 
 		Set<Location> locations = findCommandblocks(bounds[0], bounds[1], pattern);
 
 		if (locations.size() > 0) {
-			if (sender instanceof Player) {
-				for (Location loc : locations) {
-					plugin.messenger.message(
-							"Found command at:" + Statics.locationToString(loc),
-							"Teleport there!",
-							"/tp @p" + Statics.locationToString(loc));
-				}
-			} else if (sender instanceof BlockCommandSender) {
-				StringBuilder message = new StringBuilder("Found command at:");
-				locations.forEach(loc -> message.append(Statics.locationToString(loc)).append(" ;"));
+			for (Location loc : locations) {
+				receiver.sendMessage(
+					"Found command at:" + CommandCorrector.locationToString(loc),
+					"Teleport there!",
+					"/tp @p" + CommandCorrector.locationToString(loc));
 			}
 		} else {
-			sender.sendMessage("No command found.");
+			receiver.sendMessage("No command found.");
 		}
 
 		return true;

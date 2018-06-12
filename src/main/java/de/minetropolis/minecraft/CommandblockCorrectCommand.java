@@ -3,10 +3,7 @@ package de.minetropolis.minecraft;
 import java.util.*;
 
 import de.minetropolis.messages.PlayerReceiver;
-import de.minetropolis.process.Config;
 import org.bukkit.Location;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.CommandBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,11 +12,10 @@ import de.minetropolis.process.InterpretedPattern;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
-public class CommandblockCorrectCommand implements CommandExecutor {
+public class CommandblockCorrectCommand implements CommandExecutor, TraceBackCommand {
 
 	private final CommandCorrector plugin;
 	private PlayerReceiver receiver;
-	private List<InterpretedPattern> defaultChangeRules = Collections.emptyList();
 
 	private Map<Character, Vector> directionToVector = new HashMap<Character, Vector>() {
 		private static final long serialVersionUID = 1L;
@@ -38,6 +34,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		this.plugin = plugin;
 	}
 
+	@Override
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 	    if (sender instanceof Player) {
             receiver = new PlayerReceiver();
@@ -54,7 +51,7 @@ public class CommandblockCorrectCommand implements CommandExecutor {
 		if (args == null || args.length == 0)
 			return false;
 
-		args = plugin.process(args);
+		args = CommandCorrector.process(args);
 
 		Vector[] vectorPriorities;
 
@@ -149,45 +146,20 @@ public class CommandblockCorrectCommand implements CommandExecutor {
     }
 
 	private void correctCommandblocks(Location start, Location end, Vector[] vectors, List<InterpretedPattern> patterns) {
-		int blocksFound = 0;
-		int blocksChanges = 0;
-		int blocksModified = 0;
-		Location current = start.clone();
-		List<String> strings = new ArrayList<>();
+		List<String> strings = plugin.goThroughArea(start, end, vectors, new ArrayList<>());
 
-		while (locationSmaller(current, end, vectors[2])) {
-            while (locationSmaller(current, end, vectors[1])) {
-                while (locationSmaller(current, end, vectors[0])) {
-                    BlockState commandBlock = current.getBlock().getState();
-                    if (commandBlock instanceof CommandBlock) {
-                        strings.add(((CommandBlock) commandBlock).getCommand());
-                    }
-                    current.add(vectors[0]);
-                }
-                resetLocation(current, start, vectors[0]);
-                current.add(vectors[1]);
-            }
-            resetLocation(current, start, vectors[1]);
-            current.add(vectors[2]);
-        }
         if (strings.size() == 0) {
 		    receiver.sendMessage("No Commandblocks found.");
 		    return;
         }
-        plugin.startProcess(strings, patterns, receiver);
+        
+        plugin.startProcess(strings, patterns, this, receiver, start, end, vectors);
 	}
 
-	private void resetLocation(Location current, Location start, Vector direction) {
-		if (direction.getX() != 0)
-			current.setX(start.getX());
-		if (direction.getY() != 0)
-			current.setY(start.getY());
-		if (direction.getZ() != 0)
-			current.setZ(start.getZ());
-	}
-
-	private boolean locationSmaller(Location start, Location end, Vector vec) {
-		return start.getX() * vec.getX() + start.getY() * vec.getY() + start.getZ() * vec.getZ() <= end.getX() * vec.getX() + end.getY() * vec.getY() + end.getZ() * vec.getZ();
+	@Override
+	public void returnResult(String id, List<String> strings) {
+		LogEntry entry = plugin.entries.get(id);
+		plugin.goThroughArea(entry.start, entry.end, entry.vectors, strings);
 	}
 
 }

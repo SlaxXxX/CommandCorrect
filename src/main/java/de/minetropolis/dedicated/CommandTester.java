@@ -3,13 +3,10 @@ package de.minetropolis.dedicated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import de.minetropolis.messages.ConsoleReceiver;
 import de.minetropolis.process.CorrectionProcess;
-import de.minetropolis.process.IPCounters;
 import de.minetropolis.process.InterpretedPattern;
 import de.minetropolis.process.ProcessExecutor;
 

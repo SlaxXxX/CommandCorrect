@@ -66,7 +66,7 @@ public class DedicatedCorrector implements ProcessExecutor {
 	}
 
 	@Override
-	public void collectFinished(String id, List<String> strings) {
+	public synchronized void collectFinished(String id, List<String> strings) {
 		System.out.println("Dedicated Corrector: Finished " + id);
 		for (File file : content) {
 			if (file.getName().equals(id)) {

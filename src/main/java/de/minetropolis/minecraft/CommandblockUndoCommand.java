@@ -1,22 +1,21 @@
 package de.minetropolis.minecraft;
 
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.block.CommandBlock;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 
-import de.minetropolis.newutil.Statics;
-import de.minetropolis.newutil.Corrections.CommandData;
-import de.minetropolis.newutil.Corrections.Correction;
+import de.minetropolis.messages.BukkitConsoleReceiver;
+import de.minetropolis.messages.MessageReceiver;
+import de.minetropolis.messages.PlayerReceiver;
 
 import java.util.*;
 
 public class CommandblockUndoCommand implements CommandExecutor {
 
     private final CommandCorrector plugin;
+    private MessageReceiver receiver;
 
     public CommandblockUndoCommand(CommandCorrector plugin) {
         this.plugin = Objects.requireNonNull(plugin);
@@ -24,14 +23,16 @@ public class CommandblockUndoCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        plugin.messenger.setReceiver(sender);
-        boolean result = doCommand(sender, command, label, args);
-        plugin.messenger.reset();
-        return result;
-    }
-
-    public boolean doCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (!sender.hasPermission("commandcorrect.undo")) {
+	    if (sender instanceof Player) {
+            receiver = new PlayerReceiver();
+            ((PlayerReceiver)receiver).receiver = (Player)sender;
+	    }else if (sender instanceof ConsoleCommandSender) {
+	    	receiver = new BukkitConsoleReceiver();
+        } else {
+	        sender.sendMessage("This sender is not supported for this command. Only players and the console can use it!");
+            return true;
+	    }
+        if (!sender.hasPermission("commandcorrect.apply")) {
             sender.sendMessage("You don't have the required Permissions!");
             return true;
         }
@@ -48,44 +49,13 @@ public class CommandblockUndoCommand implements CommandExecutor {
     }
 
     private void undoCommandblocks(boolean force) {
-        Correction correction = plugin.corrections.getLast();
-        int undos = 0;
-        if (correction == null) {
-            plugin.messenger.message("Nothing to undo");
+    	
+        if (plugin.entries.isEmpty()) {
+            receiver.sendMessage("Nothing to undo");
             return;
         }
-
-
-        for (CommandData commandData : correction.getCorrections().keySet()) {
-            boolean success = undoCommandblock(commandData, force);
-            if (success) {
-                undos++;
-                plugin.messenger.message(
-                        "Undid from " + correction.getCorrections().get(commandData) + " to " + commandData.getCommand() +
-                                " in CB at:" + Statics.locationToString(commandData.getLocation()), "Teleport there", "/tp @p" + Statics.locationToString(commandData.getLocation()));
-            }
-        }
-        plugin.messenger.message("Undid " + undos + " command changes from " + correction.getCorrections().size() + " Command-Blocks");
-        plugin.corrections.undone();
-    }
-
-    private boolean undoCommandblock(CommandData commandData, boolean force) {
-        if (force) {
-            Block block = commandData.getLocation().getBlock();
-            block.setType(Material.COMMAND);
-        }
-
-        BlockState commandState = commandData.getLocation().getBlock().getState();
-
-        if (commandState instanceof CommandBlock) {
-            CommandBlock commandBlock = (CommandBlock) commandState;
-            commandBlock.setCommand(commandData.getCommand());
-            commandBlock.update(true, false);
-            return true;
-        } else {
-            plugin.messenger.message(
-                    "Commandblock at:" + Statics.locationToString(commandData.getLocation()) + " could not be undone.", "Teleport there", "/tp @p" + Statics.locationToString(commandData.getLocation()));
-        }
-        return false;
+        
+        LogEntry entry = plugin.entries.get("CC-" + plugin.idCounter);
+        plugin.goThroughArea(entry.start, entry.end, entry.vectors, entry.cp.strings);
     }
 }
