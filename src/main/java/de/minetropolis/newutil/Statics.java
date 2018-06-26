@@ -153,19 +153,22 @@ public class Statics {
 		}
 
 		Matcher matcher = Pattern.compile(ip.pattern).matcher(command);
+		int offset = 0;
 
 		while (matcher.find()) {
 			if (ip.assertion.startsWith("L;")) {
 				if (Pattern.compile(ip.assertion.substring(2)).matcher(matcher.group()).find())
 					continue;
 			}
-			command = command.substring(0, matcher.start()) + ip.target +
-				(matcher.end() < command.length() ? command.substring(matcher.end()) : "");
+			int length = command.length();
+			command = command.substring(0, matcher.start() + offset) + ip.target +
+				(matcher.end() + offset < command.length() ? command.substring(matcher.end() + offset) : "");
 
 			if (counters != null)
 				command = applyCounters(command, counters);
 			command = applyGroups(command, matcher, ip.groups);
 			command = applyDisplayGroup(command, matcher);
+			offset += command.length() - length;
 		}
 
 		return command;
