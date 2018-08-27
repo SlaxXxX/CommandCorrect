@@ -1,5 +1,6 @@
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.Map.Entry;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Rule;
@@ -7,14 +8,11 @@ import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
 import de.minetropolis.groups.*;
-import de.minetropolis.messages.ConsoleReceiver;
-import de.minetropolis.process.InterpretedPattern;
-import de.minetropolis.process.CorrectionProcess;
-import de.minetropolis.process.ProcessExecutor;
+import de.minetropolis.messages.*;
+import de.minetropolis.process.*;
 import junit.framework.Assert;
 
 public class UnitTest extends Assert implements ProcessExecutor {
-	String currentExpected = "";
 
 	@Rule
 	public ErrorCollector ec = new ErrorCollector();
@@ -93,22 +91,22 @@ public class UnitTest extends Assert implements ProcessExecutor {
 		createProcess("@s[gamemode=spectator]", "@s[gamemode=sp]", ip);
 		createProcess("[A]", "(A)", new InterpretedPattern(";>(\\((\\w)\\)|\\[\\2\\])<;", ";:(1)", "").compile());
 		createProcess("\\Test\\", "Test", new InterpretedPattern(";>(Test|\\\\Test\\\\)<;", ";:(1)", "").compile());
-		
-		ip = new InterpretedPattern(";?(\\d)",";*(inc,10);+(inc,1)","").compile();
-		createProcess("1011.121314","48.902",ip);
-		ip = new InterpretedPattern(";?(\\d)",";*(inc,10);+(inc,1)","").compile();
-		createProcess("th10s11s12131415br16.st17py18urg19m20up","th1s1s1337br0.st3py0urg4m3up",ip);
+
+		ip = new InterpretedPattern(";?(\\d)", ";*(inc,10);+(inc,1)", "").compile();
+		createProcess("1011.121314", "48.902", ip);
+		ip = new InterpretedPattern(";?(\\d)", ";*(inc,10);+(inc,1)", "").compile();
+		createProcess("th10s11s12131415br16.st17pupy18urg19m20", "th1s1s1337br0.st3pupy0urg4m3", ip);
 	}
-	
+
 	@Test
 	public void testAssertion() {
-		InterpretedPattern ip = new InterpretedPattern("a;?(.+)a","match","test");
+		InterpretedPattern ip = new InterpretedPattern("a;?(.+)a", "match", "test");
 		createProcess("testabba", "testabba", ip);
 		createProcess("match", "abba", ip);
-		ip = new InterpretedPattern("a;?(.+)a","match","L;test");
+		ip = new InterpretedPattern("a;?(.+)a", "match", "L;test");
 		createProcess("matchtest", "abbatest", ip);
 		createProcess("abtestba", "abtestba", ip);
-		
+
 	}
 
 	private void equals(String actual, String expected) {
@@ -118,12 +116,12 @@ public class UnitTest extends Assert implements ProcessExecutor {
 	private void createProcess(String expected, String string, InterpretedPattern ip) {
 		ArrayList<String> strings = new ArrayList<>();
 		strings.add(string);
-		currentExpected = expected;
-		new CorrectionProcess(this, new ConsoleReceiver(), "JUNIT").process(strings, ip).run();
+		new CorrectionProcess(this, new ConsoleReceiver(), "JUNIT").process(Collections.singletonMap(expected, string), ip).run();
 	}
 
 	@Override
-	public void collectFinished(String id, List<String> strings) {
-		equals(currentExpected, strings.get(0));
+	public void collectFinished(CorrectionProcess cp) {
+		for(Entry<String, String> entry : cp.getResult().entrySet())
+			equals(entry.getKey(), entry.getValue());
 	}
 }

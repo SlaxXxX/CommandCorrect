@@ -56,6 +56,6 @@ public class CommandblockUndoCommand implements CommandExecutor {
         }
         
         LogEntry entry = plugin.entries.get("CC-" + plugin.idCounter);
-        plugin.goThroughArea(entry.start, entry.end, entry.vectors, entry.cp.strings);
+        plugin.putCommands(entry.cp.getInput(),((PlayerReceiver)receiver).position);
     }
 }

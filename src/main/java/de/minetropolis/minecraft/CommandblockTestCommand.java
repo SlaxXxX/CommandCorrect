@@ -50,7 +50,7 @@ public class CommandblockTestCommand implements CommandExecutor, ProcessExecutor
 			args[3] = "";
 		case 4:
 			InterpretedPattern ip = new InterpretedPattern(args[1], args[2], args[3]).compile();
-			new CorrectionProcess(this, receiver, "CCT").process(Collections.singletonList(args[0]), ip).run();
+			new CorrectionProcess(this, receiver, "CCT").process(Collections.singletonMap("CCT",args[0]), ip).run();
 			break;
 		default:
 			return false;
@@ -59,7 +59,7 @@ public class CommandblockTestCommand implements CommandExecutor, ProcessExecutor
 	}
 
 	@Override
-	public void collectFinished(String id, List<String> strings) {
-		receiver.sendMessage("result would be: " + strings.get(0));
+	public void collectFinished(CorrectionProcess cp) {
+		cp.getResult().values().forEach(string -> receiver.sendMessage("result would be: " + string));
 	}
 }

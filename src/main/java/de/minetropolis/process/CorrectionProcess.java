@@ -2,8 +2,10 @@ package de.minetropolis.process;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -19,8 +21,8 @@ public class CorrectionProcess implements Runnable {
 
 	private List<InterpretedPattern> patterns;
 	private Map<String,Double> counters;
-	public List<String> strings;
-	private List<String> newStrings = new ArrayList<>();
+	public Map<String,String> input;
+	private Map<String,String> result = new LinkedHashMap<>();
 	private ProcessExecutor executor;
 	private MessageReceiver receiver;
 	private String id;
@@ -33,34 +35,34 @@ public class CorrectionProcess implements Runnable {
 
 	@Override
 	public void run() {
-		for (String string : strings) {
-			String newString = "";
+		for (Entry<String, String> entry : input.entrySet()) {
+			String output = "";
 			for (InterpretedPattern ip : patterns) {
-				newString = notify(correctString(ip, string));
+				output = notify(correctString(ip, entry.getValue()));
 			}
-			newStrings.add(newString);
+			result.put(entry.getKey(),output);
 		}
-		executor.collectFinished(id, newStrings);
+		executor.collectFinished(this);
 	}
 	
-	public CorrectionProcess process(List<String> strings, InterpretedPattern ip) {
+	public CorrectionProcess process(Map<String,String> input, InterpretedPattern ip) {
 		patterns = new ArrayList<>();
 		patterns.add(ip);
 		counters = new IPCounters(patterns).clone();
-		this.strings = strings;
+		this.input = input;
 		return this;
 	}
 	
-	public CorrectionProcess process(List<String> strings, List<InterpretedPattern> ip) {
+	public CorrectionProcess process(Map<String,String> input, List<InterpretedPattern> ip) {
 		patterns = new ArrayList<>();
 		patterns.addAll(ip);
 		counters = new IPCounters(patterns).clone();
-		this.strings = strings;
+		this.input = input;
 		return this;
 	}
 
-	public CorrectionProcess process(List<String> strings) {
-		this.strings = strings;
+	public CorrectionProcess process(Map<String,String> input) {
+		this.input = input;
 		patterns = Config.patterns;
 		counters = Config.counters.clone();
 		return this;
@@ -178,6 +180,22 @@ public class CorrectionProcess implements Runnable {
 			receiver.sendMessage(message);
 		}
 		return pattern;
+	}
+	
+	public Map<String,String> getResult() {
+		return result;
+	}
+	
+	public Map<String,String> getInput() {
+		return input;
+	}
+	
+	public String getId() {
+		return id;
+	}
+	
+	public MessageReceiver getReceiver() {
+		return receiver;
 	}
 	
 }

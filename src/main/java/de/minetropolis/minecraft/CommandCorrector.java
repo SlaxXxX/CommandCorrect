@@ -11,6 +11,7 @@ import de.minetropolis.process.InterpretedPattern;
 import de.minetropolis.process.ProcessExecutor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.CommandBlock;
 import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.CommandSender;
@@ -212,9 +213,9 @@ public class CommandCorrector extends JavaPlugin implements ProcessExecutor {
 		return processed.toArray(new String[0]);
 	}
 
-	public List<String> goThroughArea(Location start, Location end, Vector[] vectors, List<String> strings) {
+	public Map<String, String> findCommands(Location start, Location end, Vector[] vectors) {
 		Location current = start.clone();
-		boolean mode = strings.isEmpty();
+		Map<String, String> commands = new HashMap<>();
 		List<String> done = new ArrayList<>();
 
 		while (locationSmaller(current, end, vectors[2])) {
@@ -222,13 +223,7 @@ public class CommandCorrector extends JavaPlugin implements ProcessExecutor {
 				while (locationSmaller(current, end, vectors[0])) {
 					if (current.getBlock().getState() instanceof CommandBlock) {
 						CommandBlock commandBlock = (CommandBlock) current.getBlock().getState();
-						if (mode)
-							strings.add(((CommandBlock) commandBlock).getCommand());
-						else {
-							commandBlock.setCommand(strings.get(done.size()));
-							done.add(strings.get(done.size()));
-							commandBlock.update(true, false);
-						}
+						commands.put(locationToString(current), commandBlock.getCommand());
 					}
 					current.add(vectors[0]);
 				}
@@ -238,7 +233,19 @@ public class CommandCorrector extends JavaPlugin implements ProcessExecutor {
 			resetLocation(current, start, vectors[1]);
 			current.add(vectors[2]);
 		}
-		return strings;
+		return commands;
+	}
+
+	public void putCommands(Map<String, String> commands, World world) {
+		for (String location : commands.keySet()) {
+			String[] coordinates = location.split(" ");
+			Location pos = new Location(world, Integer.parseInt(coordinates[1]), Integer.parseInt(coordinates[2]), Integer.parseInt(coordinates[3]));
+			if (pos.getBlock().getState() instanceof CommandBlock) {
+				CommandBlock commandBlock = (CommandBlock) pos.getBlock().getState();
+				commandBlock.setCommand(commands.get(location));
+				commandBlock.update(true, false);
+			}
+		}
 	}
 
 	private void resetLocation(Location current, Location start, Vector direction) {
@@ -253,21 +260,21 @@ public class CommandCorrector extends JavaPlugin implements ProcessExecutor {
 	private boolean locationSmaller(Location start, Location end, Vector vec) {
 		return start.getX() * vec.getX() + start.getY() * vec.getY() + start.getZ() * vec.getZ() <= end.getX() * vec.getX() + end.getY() * vec.getY() + end.getZ() * vec.getZ();
 	}
-	
-	public void startProcess(List<String> strings, List<InterpretedPattern> patterns, TraceBackCommand tbc, MessageReceiver receiver, Location start, Location end, Vector[] vectors) {
+
+	public void startProcess(Map<String, String> commands, List<InterpretedPattern> patterns, TraceBackCommand tbc, MessageReceiver receiver, Location start, Location end, Vector[] vectors) {
 		idCounter++;
 		CorrectionProcess cp = new CorrectionProcess(this, receiver, "CC-" + idCounter);
 		if (patterns != null)
-			new Thread(cp.process(strings, patterns)).start();
+			new Thread(cp.process(commands, patterns)).start();
 		else
-			new Thread(cp.process(strings)).start();
+			new Thread(cp.process(commands)).start();
 
 		entries.put("CC-" + idCounter, new LogEntry(cp, tbc, start, end, vectors));
 	}
 
 	@Override
-	public synchronized void collectFinished(String id, List<String> strings) {
-		entries.get(id).tbc.returnResult(id, strings);
+	public synchronized void collectFinished(CorrectionProcess cp) {
+		entries.get(cp.getId()).tbc.returnResult(cp);
 	}
 }
 
@@ -287,5 +294,5 @@ class LogEntry {
 }
 
 interface TraceBackCommand {
-	public void returnResult(String id, List<String> strings);
+	public void returnResult(CorrectionProcess cp);
 }

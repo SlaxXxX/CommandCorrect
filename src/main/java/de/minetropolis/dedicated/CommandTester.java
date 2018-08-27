@@ -2,7 +2,9 @@ package de.minetropolis.dedicated;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.minetropolis.messages.ConsoleReceiver;
@@ -123,13 +125,15 @@ public class CommandTester implements ProcessExecutor {
 		for (String[] rule : rules) {
 			patterns.add(new InterpretedPattern(rule[0], rule[1], rule[2]).compile());
 		}
-		
-		cp = new CorrectionProcess(this, new ConsoleReceiver(), "TEST").process(Arrays.asList(commands), patterns);
+		Map<String,String> commandMap = new HashMap<>();
+		for(int i=0;i<commands.length;i++)
+			commandMap.put("TEST-LINE-" + i, commands[i]);
+		cp = new CorrectionProcess(this, new ConsoleReceiver(), "TEST").process(commandMap, patterns);
 
 	}
 
 	@Override
-	public void collectFinished(String id, List<String> strings) {
-		System.out.println(strings.stream().collect(Collectors.joining("\n")));
+	public void collectFinished(CorrectionProcess cp) {
+		System.out.println(cp.getResult().values().stream().collect(Collectors.joining("\n")));
 	}
 }

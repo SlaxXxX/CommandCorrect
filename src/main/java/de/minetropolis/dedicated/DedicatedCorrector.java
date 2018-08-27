@@ -6,7 +6,9 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import de.minetropolis.messages.ConsoleReceiver;
@@ -59,23 +61,26 @@ public class DedicatedCorrector implements ProcessExecutor {
 			if (appendLines)
 				fillLines = Arrays.asList(fillLines.stream().collect(Collectors.joining("\n")));
 			if (fillLines.size() > 0) {
+				Map<String,String> lineMap = new LinkedHashMap<>();
+				for(int i=0;i<fillLines.size();i++)
+					lineMap.put("DEDICATED-LINE-" + i, fillLines.get(i));
 				myProcess = new CorrectionProcess(this, new ConsoleReceiver(), file.getName());
-				new Thread(myProcess.process(fillLines)).start();
+				new Thread(myProcess.process(lineMap)).start();
 			}
 		}
 	}
 
 	@Override
-	public synchronized void collectFinished(String id, List<String> strings) {
-		System.out.println("Dedicated Corrector: Finished " + id);
+	public synchronized void collectFinished(CorrectionProcess cp) {
+		System.out.println("Dedicated Corrector: Finished " + cp.getId());
 		for (File file : content) {
-			if (file.getName().equals(id)) {
+			if (file.getName().equals(cp.getId())) {
 				file.delete();
 				OutputStreamWriter fileWriter;
 				try {
 					fileWriter = new OutputStreamWriter(new FileOutputStream(file, true), StandardCharsets.UTF_8);
 
-					String output = strings.stream().map(line -> line = line.replaceAll(";\\\\|\n", System.lineSeparator())).collect(Collectors.joining(System.lineSeparator()));
+					String output = cp.getResult().values().stream().map(line -> line = line.replaceAll(";\\\\|\n", System.lineSeparator())).collect(Collectors.joining(System.lineSeparator()));
 
 					fileWriter.write(output);
 					fileWriter.close();

@@ -4,10 +4,13 @@ import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
+
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 
 public class PlayerReceiver extends MessageReceiver {
     public Player receiver;
+    public World position;
 
     public void sendMessage(String content) {
         sendMessage(content, null, null, null, null);

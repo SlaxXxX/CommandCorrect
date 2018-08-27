@@ -8,6 +8,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 
+import de.minetropolis.process.CorrectionProcess;
 import de.minetropolis.process.InterpretedPattern;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -39,6 +40,7 @@ public class CommandblockCorrectCommand implements CommandExecutor, TraceBackCom
 	    if (sender instanceof Player) {
             receiver = new PlayerReceiver();
             receiver.receiver = (Player)sender;
+            receiver.position = ((Player) sender).getWorld();
         } else {
 	        sender.sendMessage("This sender is not supported for this command. Only players can use it!");
             return true;
@@ -146,20 +148,20 @@ public class CommandblockCorrectCommand implements CommandExecutor, TraceBackCom
     }
 
 	private void correctCommandblocks(Location start, Location end, Vector[] vectors, List<InterpretedPattern> patterns) {
-		List<String> strings = plugin.goThroughArea(start, end, vectors, new ArrayList<>());
+		Map<String, String> commands = plugin.findCommands(start, end, vectors);
 
-        if (strings.size() == 0) {
+        if (commands.size() == 0) {
 		    receiver.sendMessage("No Commandblocks found.");
 		    return;
         }
         
-        plugin.startProcess(strings, patterns, this, receiver, start, end, vectors);
+        plugin.startProcess(commands, patterns, this, receiver, start, end, vectors);
 	}
 
 	@Override
-	public void returnResult(String id, List<String> strings) {
-		LogEntry entry = plugin.entries.get(id);
-		plugin.goThroughArea(entry.start, entry.end, entry.vectors, strings);
+	public void returnResult(CorrectionProcess cp) {
+		LogEntry entry = plugin.entries.get(cp.getId());
+		plugin.putCommands(cp.getResult(),((PlayerReceiver)cp.getReceiver()).position);
 	}
 
 }
